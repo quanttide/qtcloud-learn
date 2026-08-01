@@ -1,0 +1,23 @@
+[
+  {
+    "id": "enr-1",
+    "classId": "class-1",
+    "studentId": "student-1",
+    "status": "enrolled",
+    "enrolledAt": "2026-03-01T09:00:00Z"
+  },
+  {
+    "id": "enr-2",
+    "classId": "class-1",
+    "studentId": "student-2",
+    "status": "enrolled",
+    "enrolledAt": "2026-03-01T09:05:00Z"
+  },
+  {
+    "id": "enr-3",
+    "classId": "class-1",
+    "studentId": "student-3",
+    "status": "enrolled",
+    "enrolledAt": "2026-03-01T09:10:00Z"
+  }
+]

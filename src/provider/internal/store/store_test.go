@@ -175,6 +175,75 @@ func TestEnrollmentStore_CRUD(t *testing.T) {
 	}
 }
 
+func TestTeacherStore_CRUD(t *testing.T) {
+	s := NewTeacherStore()
+
+	tr := s.Create(&domain.Teacher{Name: "王老师", Email: "wang@example.com", Title: "教授"})
+	if tr.ID == "" || tr.Name != "王老师" || tr.Title != "教授" {
+		t.Fatalf("Create() = %+v", tr)
+	}
+	if got := s.List(); len(got) != 1 {
+		t.Fatalf("List() = %d, want 1", len(got))
+	}
+
+	updated, ok := s.Update(&domain.Teacher{ID: tr.ID, Name: "王老师v2", Email: "w2@example.com", Title: "副教授"})
+	if !ok || updated.Name != "王老师v2" || updated.Title != "副教授" {
+		t.Fatalf("Update() = %+v", updated)
+	}
+	if _, ok := s.Update(&domain.Teacher{ID: "x"}); ok {
+		t.Fatal("Update() nonexistent ok = true")
+	}
+
+	if ok := s.Delete(tr.ID); !ok {
+		t.Fatal("Delete() ok = false")
+	}
+}
+
+func TestSessionStore_CRUD(t *testing.T) {
+	s := NewSessionStore()
+
+	sess := s.Create(&domain.Session{
+		ClassID: "class-1", LessonTitle: "Git 入门", TeacherID: "tea-1",
+		StartTime: "2026-09-02T09:00:00Z", DurationMinutes: 45, Location: "A-101",
+		Status: "upcoming", Attendances: []domain.Attendance{{StudentID: "stu-1", Status: "present"}},
+	})
+	if sess.ID == "" || sess.LessonTitle != "Git 入门" || sess.DurationMinutes != 45 {
+		t.Fatalf("Create() = %+v", sess)
+	}
+	if len(sess.Attendances) != 1 || sess.Attendances[0].Status != "present" {
+		t.Fatalf("Create().Attendances = %+v", sess.Attendances)
+	}
+
+	// nil attendances → 初始化为空切片
+	sess2 := s.Create(&domain.Session{ClassID: "class-1", LessonTitle: "无考勤课次"})
+	if sess2.Attendances == nil {
+		t.Fatal("Create(): Attendances should not be nil")
+	}
+
+	if got := s.List(); len(got) != 2 {
+		t.Fatalf("List() = %d, want 2", len(got))
+	}
+
+	updated, ok := s.Update(&domain.Session{
+		ID: sess.ID, ClassID: "class-1", LessonTitle: "Git 进阶", TeacherID: "tea-2",
+		StartTime: "2026-09-03T09:00:00Z", DurationMinutes: 60, Location: "B-202",
+		Status: "completed", Attendances: []domain.Attendance{{StudentID: "stu-1", Status: "absent"}},
+	})
+	if !ok || updated.LessonTitle != "Git 进阶" || updated.Status != "completed" {
+		t.Fatalf("Update() = %+v", updated)
+	}
+	if len(updated.Attendances) != 1 || updated.Attendances[0].Status != "absent" {
+		t.Fatalf("Update().Attendances = %+v", updated.Attendances)
+	}
+	if _, ok := s.Update(&domain.Session{ID: "x"}); ok {
+		t.Fatal("Update() nonexistent ok = true")
+	}
+
+	if ok := s.Delete(sess.ID); !ok {
+		t.Fatal("Delete() ok = false")
+	}
+}
+
 func TestProgressStore_CRUD(t *testing.T) {
 	s := NewProgressStore()
 

@@ -68,8 +68,8 @@
 
 | 阶段 | 状态 | 说明 |
 |------|------|------|
-| v0.2 Provider（Go） | ✅ 已完成 | 领域模型 + 6 资源 CRUD + `/api/v1` 路由已落地；`class.go`（domain / store / handler）已移植 |
-| v0.3 Studio（Flutter） | ⬜ 待开始 | — |
+| v0.2 Provider（Go） | ✅ 已完成 | 领域模型 + 8 资源 CRUD + `/api/v1` 路由已落地；`class.go`（domain / store / handler）已移植 |
+| v0.3 Studio（Flutter） | ✅ 已完成 | 登录（本地模拟）/ 我的课程 / 进度 / 课表考勤 / 班级 / 考核页面与服务已迁移 |
 | v0.4 CLI（Rust） | ⬜ 待开始 | — |
 | v0.5 旧代码移除 | ⬜ 待开始 | — |
 

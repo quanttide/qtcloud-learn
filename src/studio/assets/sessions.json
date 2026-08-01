@@ -1,0 +1,42 @@
+[
+  {
+    "id": "sess-1",
+    "classId": "class-1",
+    "lessonTitle": "Python 基础",
+    "teacherId": "teacher-1",
+    "startTime": "2026-08-01T09:00:00",
+    "durationMinutes": 90,
+    "location": "线上教室 A",
+    "status": "inProgress",
+    "attendances": [
+      {"studentId": "student-1", "status": "present"},
+      {"studentId": "student-2", "status": "late"},
+      {"studentId": "student-3", "status": "unknown"}
+    ]
+  },
+  {
+    "id": "sess-2",
+    "classId": "class-1",
+    "lessonTitle": "NumPy 入门",
+    "teacherId": "teacher-1",
+    "startTime": "2026-08-02T14:00:00",
+    "durationMinutes": 90,
+    "location": "线上教室 A",
+    "status": "upcoming",
+    "attendances": []
+  },
+  {
+    "id": "sess-3",
+    "classId": "class-2",
+    "lessonTitle": "HDFS 原理与实践",
+    "teacherId": "teacher-2",
+    "startTime": "2026-07-20T09:00:00",
+    "durationMinutes": 120,
+    "location": "实训基地 3楼机房",
+    "status": "completed",
+    "attendances": [
+      {"studentId": "student-4", "status": "present"},
+      {"studentId": "student-5", "status": "present"}
+    ]
+  }
+]

@@ -32,6 +32,8 @@ func TestRouter_LMSRoutes(t *testing.T) {
 	}{
 		{"classes", "/api/v1/classes", `{"name":"浙理班级","refId":"prog-1"}`},
 		{"students", "/api/v1/students", `{"name":"张三"}`},
+		{"teachers", "/api/v1/teachers", `{"name":"王老师"}`},
+		{"sessions", "/api/v1/sessions", `{"classId":"class-1","lessonTitle":"Git 入门"}`},
 		{"assessments", "/api/v1/assessments", `{"classId":"class-1","title":"作业1"}`},
 		{"submissions", "/api/v1/submissions", `{"assessmentId":"assess-1","studentId":"stu-1"}`},
 		{"enrollments", "/api/v1/enrollments", `{"classId":"class-1","studentId":"stu-1"}`},

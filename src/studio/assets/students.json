@@ -1,0 +1,7 @@
+[
+  {"id": "student-1", "name": "张三", "email": "zhangsan@example.com", "plan": "vip"},
+  {"id": "student-2", "name": "李四", "email": "lisi@example.com", "plan": "free"},
+  {"id": "student-3", "name": "王五", "email": "wangwu@example.com", "plan": "paid"},
+  {"id": "student-4", "name": "赵六", "email": "zhaoliu@example.com", "plan": "free"},
+  {"id": "student-5", "name": "陈七", "email": "chenqi@example.com", "plan": "free"}
+]

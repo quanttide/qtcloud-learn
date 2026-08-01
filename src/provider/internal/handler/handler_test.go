@@ -15,6 +15,8 @@ import (
 func setupMux() *http.ServeMux {
 	classStore := store.NewClassStore()
 	studentStore := store.NewStudentStore()
+	teacherStore := store.NewTeacherStore()
+	sessionStore := store.NewSessionStore()
 	assessmentStore := store.NewAssessmentStore()
 	submissionStore := store.NewSubmissionStore()
 	enrollmentStore := store.NewEnrollmentStore()
@@ -22,6 +24,8 @@ func setupMux() *http.ServeMux {
 
 	ch := NewClassHandler(classStore)
 	sh := NewStudentHandler(studentStore)
+	th := NewTeacherHandler(teacherStore)
+	sessh := NewSessionHandler(sessionStore)
 	ah := NewAssessmentHandler(assessmentStore)
 	subh := NewSubmissionHandler(submissionStore)
 	eh := NewEnrollmentHandler(enrollmentStore)
@@ -38,6 +42,16 @@ func setupMux() *http.ServeMux {
 	mux.HandleFunc("GET /api/v1/students/{id}", sh.Get)
 	mux.HandleFunc("PUT /api/v1/students/{id}", sh.Update)
 	mux.HandleFunc("DELETE /api/v1/students/{id}", sh.Delete)
+	mux.HandleFunc("GET /api/v1/teachers", th.List)
+	mux.HandleFunc("POST /api/v1/teachers", th.Create)
+	mux.HandleFunc("GET /api/v1/teachers/{id}", th.Get)
+	mux.HandleFunc("PUT /api/v1/teachers/{id}", th.Update)
+	mux.HandleFunc("DELETE /api/v1/teachers/{id}", th.Delete)
+	mux.HandleFunc("GET /api/v1/sessions", sessh.List)
+	mux.HandleFunc("POST /api/v1/sessions", sessh.Create)
+	mux.HandleFunc("GET /api/v1/sessions/{id}", sessh.Get)
+	mux.HandleFunc("PUT /api/v1/sessions/{id}", sessh.Update)
+	mux.HandleFunc("DELETE /api/v1/sessions/{id}", sessh.Delete)
 	mux.HandleFunc("GET /api/v1/assessments", ah.List)
 	mux.HandleFunc("POST /api/v1/assessments", ah.Create)
 	mux.HandleFunc("GET /api/v1/assessments/{id}", ah.Get)
@@ -259,6 +273,59 @@ func TestSubmissionHandler_CRUD(t *testing.T) {
 	}
 
 	w = request(t, mux, "DELETE", fmt.Sprintf("/api/v1/submissions/%s", sid), "")
+	assertStatus(t, w, 204)
+}
+
+func TestTeacherHandler_CRUD(t *testing.T) {
+	mux := setupMux()
+
+	w := request(t, mux, "POST", "/api/v1/teachers", `{"name":"王老师","email":"wang@example.com","title":"教授"}`)
+	assertStatus(t, w, 201)
+	tr := assertJSON(t, w)
+	tid := tr["id"].(string)
+	if tr["name"] != "王老师" || tr["title"] != "教授" {
+		t.Fatalf("Create = %v", tr)
+	}
+
+	w = request(t, mux, "POST", "/api/v1/teachers", `{"name":""}`)
+	assertStatus(t, w, 400)
+
+	w = request(t, mux, "PUT", fmt.Sprintf("/api/v1/teachers/%s", tid), `{"name":"王老师v2","email":"w2@example.com","title":"副教授"}`)
+	assertStatus(t, w, 200)
+	tr = assertJSON(t, w)
+	if tr["name"] != "王老师v2" || tr["title"] != "副教授" {
+		t.Fatalf("Update = %v", tr)
+	}
+
+	w = request(t, mux, "DELETE", fmt.Sprintf("/api/v1/teachers/%s", tid), "")
+	assertStatus(t, w, 204)
+}
+
+func TestSessionHandler_CRUD(t *testing.T) {
+	mux := setupMux()
+
+	w := request(t, mux, "POST", "/api/v1/sessions", `{"classId":"class-1","lessonTitle":"Git 入门","teacherId":"tea-1","startTime":"2026-09-02T09:00:00Z","durationMinutes":45,"location":"A-101","status":"upcoming","attendances":[{"studentId":"stu-1","status":"present"}]}`)
+	assertStatus(t, w, 201)
+	sess := assertJSON(t, w)
+	sid := sess["id"].(string)
+	if sess["lessonTitle"] != "Git 入门" || sess["durationMinutes"] != float64(45) {
+		t.Fatalf("Create = %v", sess)
+	}
+
+	w = request(t, mux, "POST", "/api/v1/sessions", `{"lessonTitle":"缺classId"}`)
+	assertStatus(t, w, 400)
+
+	w = request(t, mux, "POST", "/api/v1/sessions", `{"classId":"class-1"}`)
+	assertStatus(t, w, 400)
+
+	w = request(t, mux, "PUT", fmt.Sprintf("/api/v1/sessions/%s", sid), `{"classId":"class-1","lessonTitle":"Git 进阶","teacherId":"tea-2","startTime":"2026-09-03T09:00:00Z","durationMinutes":60,"location":"B-202","status":"completed","attendances":[{"studentId":"stu-1","status":"absent"}]}`)
+	assertStatus(t, w, 200)
+	sess = assertJSON(t, w)
+	if sess["lessonTitle"] != "Git 进阶" || sess["status"] != "completed" {
+		t.Fatalf("Update = %v", sess)
+	}
+
+	w = request(t, mux, "DELETE", fmt.Sprintf("/api/v1/sessions/%s", sid), "")
 	assertStatus(t, w, 204)
 }
 

@@ -12,6 +12,8 @@ import (
 func newRouter() *http.ServeMux {
 	classStore := store.NewClassStore()
 	studentStore := store.NewStudentStore()
+	teacherStore := store.NewTeacherStore()
+	sessionStore := store.NewSessionStore()
 	assessmentStore := store.NewAssessmentStore()
 	submissionStore := store.NewSubmissionStore()
 	enrollmentStore := store.NewEnrollmentStore()
@@ -19,6 +21,8 @@ func newRouter() *http.ServeMux {
 
 	ch := handler.NewClassHandler(classStore)
 	sh := handler.NewStudentHandler(studentStore)
+	th := handler.NewTeacherHandler(teacherStore)
+	sessh := handler.NewSessionHandler(sessionStore)
 	ah := handler.NewAssessmentHandler(assessmentStore)
 	subh := handler.NewSubmissionHandler(submissionStore)
 	eh := handler.NewEnrollmentHandler(enrollmentStore)
@@ -39,6 +43,20 @@ func newRouter() *http.ServeMux {
 	mux.HandleFunc("GET /api/v1/students/{id}", sh.Get)
 	mux.HandleFunc("PUT /api/v1/students/{id}", sh.Update)
 	mux.HandleFunc("DELETE /api/v1/students/{id}", sh.Delete)
+
+	// Teacher
+	mux.HandleFunc("GET /api/v1/teachers", th.List)
+	mux.HandleFunc("POST /api/v1/teachers", th.Create)
+	mux.HandleFunc("GET /api/v1/teachers/{id}", th.Get)
+	mux.HandleFunc("PUT /api/v1/teachers/{id}", th.Update)
+	mux.HandleFunc("DELETE /api/v1/teachers/{id}", th.Delete)
+
+	// Session（课次 / 考勤）
+	mux.HandleFunc("GET /api/v1/sessions", sessh.List)
+	mux.HandleFunc("POST /api/v1/sessions", sessh.Create)
+	mux.HandleFunc("GET /api/v1/sessions/{id}", sessh.Get)
+	mux.HandleFunc("PUT /api/v1/sessions/{id}", sessh.Update)
+	mux.HandleFunc("DELETE /api/v1/sessions/{id}", sessh.Delete)
 
 	// Assessment
 	mux.HandleFunc("GET /api/v1/assessments", ah.List)

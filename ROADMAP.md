@@ -64,19 +64,19 @@
 
 ### 交付物
 
-- [ ] 登录页（飞书登录）
-- [ ] 我的课程 / 选课报名页
-- [ ] 学习进度页（依赖 v0.2 progress API）
-- [ ] 课表（自 `qtclass` schedule）与考勤（自 `qtclass` classroom）
-- [ ] 考核列表 / 详情 / 提交（自 `qtcloud-course` assessment）
-- [ ] 班级管理页 + 仪表盘（自 `qtcloud-course` class / dashboard）
-- [ ] 学习记录由 localStorage（`qtclass` history_service）改为服务端进度数据
-- [ ] 模型 / 服务全量迁移：student / teacher / class_teaching / assessment / submission / enums（LMS 部分）与 data_service / app_state（sessions 加载），文件级明细见 `docs/lms-inventory.md`
+- [x] 登录页（飞书登录 · 本地模拟）
+- [x] 我的课程 / 选课报名页
+- [x] 学习进度页（依赖 v0.2 progress API）
+- [x] 课表（自 `qtclass` schedule）与考勤（自 `qtclass` classroom）
+- [x] 考核列表 / 详情 / 提交（自 `qtcloud-course` assessment）
+- [x] 班级管理页 + 仪表盘（自 `qtcloud-course` class / dashboard）
+- [x] 学习记录由 localStorage（`qtclass` history_service）改为服务端进度数据
+- [x] 模型 / 服务全量迁移：student / teacher / class_teaching / assessment / submission / enums（LMS 部分）与 data_service / app_state（sessions 加载），文件级明细见 `docs/lms-inventory.md`
 
 ### 测试
 
-- [ ] 各页面 widget 测试
-- [ ] `qtclass` 移除 LMS 模块后，播放器测试保持全绿
+- [x] 各页面 widget 测试
+- [ ] `qtclass` 移除 LMS 模块后，播放器测试保持全绿（待 v0.5）
 
 ## [v0.4] — CLI 迁移（Rust）
 

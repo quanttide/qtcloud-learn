@@ -1,0 +1,26 @@
+[
+  {
+    "id": "prog-1",
+    "studentId": "student-1",
+    "classId": "class-1",
+    "percent": 0.6,
+    "finished": false,
+    "updatedAt": "2026-07-10T09:00:00Z"
+  },
+  {
+    "id": "prog-2",
+    "studentId": "student-2",
+    "classId": "class-1",
+    "percent": 0.4,
+    "finished": false,
+    "updatedAt": "2026-07-08T09:00:00Z"
+  },
+  {
+    "id": "prog-3",
+    "studentId": "student-3",
+    "classId": "class-1",
+    "percent": 0.8,
+    "finished": false,
+    "updatedAt": "2026-07-12T09:00:00Z"
+  }
+]
