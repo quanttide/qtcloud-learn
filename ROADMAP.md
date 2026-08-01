@@ -11,8 +11,19 @@
 **迁移原则：**
 
 1. **先建新、后删旧**：LMS 能力先在 `qtcloud-learn` 落地并通过测试，再从旧仓库移除。
-2. **冻结旧代码**：自 v0.1 起，`qtclass` / `qtcloud-course` 不再新增 LMS 功能，仅做缺陷修复。
+2. **冻结旧代码**：自 v0.1 起，`qtclass` / `qtcloud-course` 不再新增 LMS 功能，仅做缺陷修复（冻结声明落点：`qtcloud-course/ROADMAP.md`、`qtclass/STATUS.md`）。
 3. **模型唯一**：以 `qtcloud-learn` 为唯一事实来源；旧仓库的重复模型（如 `Class`、`Student`）只映射、不复用。
+
+**职责边界：**
+
+- 认证（飞书登录）与学员数据属 `qtcloud-learn/provider`；`qtcloud-course` 不再规划认证 API。
+- 播放器（player / lecture）保留在 `qtclass`；学员侧入口统一由 `qtcloud-learn/studio` 承接，`qtcloud-course` 不再规划学生端播放器。
+
+**版本依赖：**
+
+- v0.2（provider）与 v0.3（studio）可并行；v0.3 学习进度页依赖 v0.2 的 progress API。
+- v0.3 登录页（飞书登录）依赖 provider 认证能力，认证 API 未在本路线图排期，需另行规划或先本地模拟。
+- v0.5 依赖 v0.1–v0.4 全部完成。
 
 代码盘点清单见 [docs/lms-inventory.md](docs/lms-inventory.md)。
 
@@ -23,8 +34,8 @@
 ### 交付物
 
 - [x] 盘点两仓库 LMS 代码清单（见 `docs/lms-inventory.md`）
-- [ ] `qtclass` / `qtcloud-course` 声明冻结 LMS 功能迭代
-- [ ] 定义 `qtcloud-learn` 统一领域模型（学员 / 班级 / 课次 / 选课 / 进度 / 考核 / 记录）
+- [ ] `qtclass` / `qtcloud-course` 声明冻结 LMS 功能迭代（落点：`qtcloud-course/ROADMAP.md`、`qtclass/STATUS.md`）
+- [ ] 定义 `qtcloud-learn` 统一领域模型：Student / Teacher / Class / Session / Enrollment / Progress / Assessment / Submission；LearningRecord 不独立建模，并入 Progress 作为服务端进度数据
 
 ### 测试
 
@@ -45,6 +56,7 @@
 
 - [ ] 移植的 CRUD 测试全部通过
 - [ ] 新增 enrollment / progress API 测试
+- [ ] 健康检查 `/healthz` 测试
 
 ## [v0.3] — Studio 迁移（Flutter 客户端）
 
@@ -54,11 +66,12 @@
 
 - [ ] 登录页（飞书登录）
 - [ ] 我的课程 / 选课报名页
-- [ ] 学习进度页
+- [ ] 学习进度页（依赖 v0.2 progress API）
 - [ ] 课表（自 `qtclass` schedule）与考勤（自 `qtclass` classroom）
 - [ ] 考核列表 / 详情 / 提交（自 `qtcloud-course` assessment）
-- [ ] 班级管理页（自 `qtcloud-course` class）
+- [ ] 班级管理页 + 仪表盘（自 `qtcloud-course` class / dashboard）
 - [ ] 学习记录由 localStorage（`qtclass` history_service）改为服务端进度数据
+- [ ] 模型 / 服务全量迁移：student / teacher / class_teaching / assessment / submission / enums（LMS 部分）与 data_service / app_state（sessions 加载），文件级明细见 `docs/lms-inventory.md`
 
 ### 测试
 
@@ -84,11 +97,16 @@
 ### 交付物
 
 - [ ] `qtcloud-course/provider`：移除 `class.go`（domain / store / handler）与相关测试
-- [ ] `qtcloud-course/studio`：移除 assessment / class / student / teacher / submission 模型、页面、服务与 assets JSON
-- [ ] `qtclass/studio`：移除 session（课表/考勤）、learning_record、schedule / classroom / result 页面与 `sessions.json`
-- [ ] 数据迁移：旧 assets JSON 与 localStorage 数据导入 `qtcloud-learn`
+- [ ] `qtcloud-course/studio`：移除 assessment / class / student / teacher / submission 模型、页面、服务，`enums.dart`（LMS 部分）、`dashboard_screen.dart`、`data_service.dart`（LMS 部分）与对应 assets JSON
+- [ ] `qtclass/studio`：移除 session（课表/考勤）、learning_record、schedule / classroom / result 页面与 `sessions.json`（`lectures.json` 与播放器代码保留）
+- [ ] 数据迁移：旧 assets JSON 与 localStorage 数据导入 `qtcloud-learn`（localStorage 在客户端本地，需一次性导入脚本写入服务端进度数据）
 
 ### 测试
 
 - [ ] 两仓库移除后 build / test 全绿
-- [ ] `grep` 校验无 LMS 残留引用（class / student / assessment 等）
+- [ ] 按 `docs/lms-inventory.md` 文件清单逐项核对移除；`grep` 校验注意 `class` 是 Dart 关键字，需限定文件名 / 标识符避免误报
+
+## 后续
+
+> 本路线图仅覆盖 LMS 迁移阶段（v0.1–v0.5）。迁移完成后，`qtcloud-learn` 的产品能力演进
+> （认证完善、付费 / VIP 权益、学员侧播放等）另行规划。
