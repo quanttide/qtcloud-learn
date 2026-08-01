@@ -1,14 +1,18 @@
 # ROADMAP
 
-## [v0.1] — 学员数据与进度（规划中）
+> 本 scope 规划对齐根 [ROADMAP.md](../../ROADMAP.md) 的迁移阶段。
 
-> **目标**：学员、选课、进度相关的 CLI 子命令可用。
+## [v0.1] — 学员侧子命令（对齐根 ROADMAP v0.4）
+
+> **目标**：提供学员侧 CLI 子命令，承接 `qtcloud-course` cli 中规划的 class / student 能力。
 
 ### 交付物
 
-- [ ] `student` 子命令（create / list / get）
-- [ ] `enrollment` 子命令（选课 / 退课）
-- [ ] `progress` 子命令（上报 / 查看进度）
+- [ ] student 子命令（create / list / get）
+- [ ] class 子命令（create / list / get）
+- [ ] enrollment 子命令（选课 / 退课）
+- [ ] progress 子命令（上报 / 查看进度）
+- [ ] assessment 子命令（create / submit / grade / stats）
 
 ### 测试
 

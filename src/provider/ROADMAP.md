@@ -1,18 +1,19 @@
 # ROADMAP
 
-## [v0.1] — 学员学习闭环（规划中）
+> 本 scope 规划对齐根 [ROADMAP.md](../../ROADMAP.md) 的迁移阶段。
 
-> **目标**：学员注册到学习进度查看的完整闭环。
+## [v0.1] — LMS API 迁移（对齐根 ROADMAP v0.2）
+
+> **目标**：承接 `qtcloud-course/provider` 的 LMS API，成为学习云唯一服务端。
 
 ### 交付物
 
-- [ ] 学员注册与认证（飞书登录）
-- [ ] 选课 / 报名流程
-- [ ] 学习进度追踪 API
-- [ ] 考核提交与成绩查看
+- [ ] 领域模型：Student / Teacher / Class / Session / Enrollment / Progress / Assessment / Submission
+- [ ] Store + Handler：class / student / assessment / submission / enrollment / progress CRUD
+- [ ] 路由注册（`/api/v1/...`）与健康检查
+- [ ] 从 `qtcloud-course/provider` 移植 class.go（domain / store / handler）
 
 ### 测试
 
-- [ ] 学员 CRUD + 进度 API 测试
-- [ ] 认证与权限测试
-- [ ] 集成测试：注册 → 选课 → 学习 → 进度查看
+- [ ] 移植的 CRUD 测试全部通过
+- [ ] 新增 enrollment / progress API 测试
