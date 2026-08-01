@@ -96,17 +96,17 @@
 
 ### 交付物
 
-- [ ] `qtcloud-course/provider`：移除 `class.go`（domain / store / handler）与相关测试
-- [ ] `qtcloud-course/studio`：移除 assessment / class / student / teacher / submission 模型、页面、服务，`enums.dart`（LMS 部分）、`dashboard_screen.dart`、`data_service.dart`（LMS 部分）与对应 assets JSON
-- [ ] `qtclass/studio`：移除 session（课表/考勤）、learning_record、schedule / classroom / result 页面与 `sessions.json`（`lectures.json` 与播放器代码保留）
-- [ ] 数据迁移：旧 assets JSON 与 localStorage 数据导入 `qtcloud-learn`（localStorage 在客户端本地，需一次性导入脚本写入服务端进度数据）
+- [x] `qtcloud-course/provider`：移除 `class.go`（domain / store / handler）与相关测试
+- [x] `qtcloud-course/studio`：移除 assessment / class / student / teacher / submission 模型、页面、服务，`enums.dart`（LMS 部分）、`dashboard_screen.dart`、`data_service.dart`（LMS 部分）与对应 assets JSON
+- [x] `qtclass/studio`：移除 session（课表/考勤）、learning_record、schedule / classroom / result 页面与 `sessions.json`（`lectures.json` 与播放器代码保留）
+- [x] 数据迁移：旧 assets JSON 与 localStorage 数据导入 `qtcloud-learn`（localStorage 在客户端本地，需一次性导入脚本写入服务端进度数据）
 
 ### 测试
 
-- [ ] 两仓库移除后 build / test 全绿
-- [ ] 按 `docs/lms-inventory.md` 文件清单逐项核对移除；`grep` 校验注意 `class` 是 Dart 关键字，需限定文件名 / 标识符避免误报
+- [x] 两仓库移除后 build / test 全绿
+- [x] 按 `docs/lms-inventory.md` 文件清单逐项核对移除；`grep` 校验注意 `class` 是 Dart 关键字，需限定文件名 / 标识符避免误报
 
 ## 后续
 
-> 本路线图仅覆盖 LMS 迁移阶段（v0.1–v0.5）。迁移完成后，`qtcloud-learn` 的产品能力演进
+> 本路线图仅覆盖 LMS 迁移阶段（v0.1–v0.5），已全部完成。迁移完成后，`qtcloud-learn` 的产品能力演进
 > （认证完善、付费 / VIP 权益、学员侧播放等）另行规划。
