@@ -84,11 +84,11 @@
 
 ### 交付物
 
-- [ ] student / class / enrollment / progress / assessment 子命令
+- [x] student / class / enrollment / progress / assessment 子命令
 
 ### 测试
 
-- [ ] 子命令 CLI 测试
+- [x] 子命令 CLI 测试
 
 ## [v0.5] — 旧代码移除
 

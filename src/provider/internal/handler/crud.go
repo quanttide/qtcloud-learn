@@ -71,8 +71,21 @@ func (h *CRUDHandler[T]) Get(w http.ResponseWriter, r *http.Request) {
 
 func (h *CRUDHandler[T]) Update(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
+	existing, ok := h.store.Get(id)
+	if !ok {
+		http.Error(w, `{"error":"not found"}`, http.StatusNotFound)
+		return
+	}
+
+	// 合并语义：仅覆盖请求体中出现的字段，未提交字段保持不变。
+	merged, err := mergeJSON(existing, r)
+	if err != nil {
+		http.Error(w, `{"error":"invalid request body"}`, http.StatusBadRequest)
+		return
+	}
+
 	var entity T
-	if err := json.NewDecoder(r.Body).Decode(&entity); err != nil {
+	if err := json.Unmarshal(merged, &entity); err != nil {
 		http.Error(w, `{"error":"invalid request body"}`, http.StatusBadRequest)
 		return
 	}
@@ -83,6 +96,26 @@ func (h *CRUDHandler[T]) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, updated)
+}
+
+// mergeJSON 将请求体作为补丁合并到现有实体上，返回合并后的 JSON。
+func mergeJSON(existing any, r *http.Request) ([]byte, error) {
+	base, err := json.Marshal(existing)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	if err := json.Unmarshal(base, &merged); err != nil {
+		return nil, err
+	}
+	var patch map[string]json.RawMessage
+	if err := json.NewDecoder(r.Body).Decode(&patch); err != nil {
+		return nil, err
+	}
+	for k, v := range patch {
+		merged[k] = v
+	}
+	return json.Marshal(merged)
 }
 
 func (h *CRUDHandler[T]) Delete(w http.ResponseWriter, r *http.Request) {

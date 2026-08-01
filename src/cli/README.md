@@ -8,12 +8,24 @@
 # 构建
 cargo build
 
-# 运行
-cargo run -- version
+# 运行（默认连接 http://localhost:8080 的 provider）
+./target/debug/qtcloud-learn --base-url http://localhost:8080 student list
 
 # 测试
 cargo test
 ```
+
+## 子命令
+
+| 子命令 | 操作 |
+|--------|------|
+| `student` | create / list / get |
+| `class` | create / list / get |
+| `enrollment` | enroll（选课）/ withdraw（退课）/ list |
+| `progress` | report（上报）/ get（查看） |
+| `assessment` | create / submit / grade / stats |
+
+连接的是 `qtcloud-learn-provider`（`/api/v1`）。
 
 ## 相关文档
 

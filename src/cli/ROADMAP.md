@@ -8,12 +8,12 @@
 
 ### 交付物
 
-- [ ] student 子命令（create / list / get）
-- [ ] class 子命令（create / list / get）
-- [ ] enrollment 子命令（选课 / 退课）
-- [ ] progress 子命令（上报 / 查看进度）
-- [ ] assessment 子命令（create / submit / grade / stats）
+- [x] student 子命令（create / list / get）
+- [x] class 子命令（create / list / get）
+- [x] enrollment 子命令（选课 / 退课）
+- [x] progress 子命令（上报 / 查看进度）
+- [x] assessment 子命令（create / submit / grade / stats）
 
 ### 测试
 
-- [ ] 子命令 CLI 测试
+- [x] 子命令 CLI 测试

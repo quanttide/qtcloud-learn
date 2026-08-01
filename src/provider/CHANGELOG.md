@@ -12,6 +12,7 @@
 ### Fixed
 
 - `version.go` 由根目录 `package main` 修正为 `internal/version`，`go build ./...` 恢复可用
+- `PUT` 改为 JSON 合并语义：仅覆盖请求体中的字段（修复评分等局部更新抹掉 assessmentId / studentId 的问题）
 
 ## [0.0.1] - 2026-08-01
 

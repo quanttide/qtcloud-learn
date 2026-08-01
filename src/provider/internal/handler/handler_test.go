@@ -272,6 +272,14 @@ func TestSubmissionHandler_CRUD(t *testing.T) {
 		t.Fatalf("Update = %v", sub)
 	}
 
+	// 局部更新（合并语义）：仅评分不抹掉 assessmentId / studentId
+	w = request(t, mux, "PUT", fmt.Sprintf("/api/v1/submissions/%s", sid), `{"score":90,"comment":"更新"}`)
+	assertStatus(t, w, 200)
+	sub = assertJSON(t, w)
+	if sub["score"] != float64(90) || sub["assessmentId"] != "assess-1" || sub["studentId"] != "stu-1" {
+		t.Fatalf("Partial Update = %v", sub)
+	}
+
 	w = request(t, mux, "DELETE", fmt.Sprintf("/api/v1/submissions/%s", sid), "")
 	assertStatus(t, w, 204)
 }
