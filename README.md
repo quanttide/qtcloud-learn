@@ -12,6 +12,15 @@ AI 原生学员学习中心。
 - 考核提交与成绩
 - 付费 / VIP 权益
 
+## 仓库结构
+
+```
+src/
+├── provider/  # 服务端（Go）
+├── studio/    # 客户端（Flutter）
+└── cli/       # 命令行工具（Rust）
+```
+
 ## 开发
 
 见 [docs/dev-guide.md](docs/dev-guide.md)。
