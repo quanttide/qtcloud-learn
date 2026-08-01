@@ -1,19 +1,39 @@
 # ROADMAP
 
-> 本 scope 规划对齐根 [ROADMAP.md](../../ROADMAP.md) 的迁移阶段。
+> 本 scope 规划对齐根 [ROADMAP.md](../../ROADMAP.md) 的能力演进阶段。
 
-## [v0.4] — 学员侧子命令
+## [v1.0] — 直连 provider（对齐根 v1.0）
 
-> **目标**：提供学员侧 CLI 子命令，承接 `qtcloud-course` cli 中规划的 class / student 能力。
+> **目标**：子命令真实对接 provider，端到端可用。
 
 ### 交付物
 
-- [x] student 子命令（create / list / get）
-- [x] class 子命令（create / list / get）
-- [x] enrollment 子命令（选课 / 退课）
-- [x] progress 子命令（上报 / 查看进度）
-- [x] assessment 子命令（create / submit / grade / stats）
+- [ ] 子命令冒烟脚本（provider 启动 → student / class / enrollment / progress / assessment 全链路）
+- [ ] 错误处理：连接失败 / 404 / 400 可读提示
 
 ### 测试
 
-- [x] 子命令 CLI 测试
+- [ ] 冒烟脚本 CI 化
+- [ ] 错误路径测试
+
+## [v1.1] — 认证与权益（对齐根 v1.1 / v1.2）
+
+### 交付物
+
+- [ ] 子命令支持 token 参数（登录态）
+- [ ] plan 字段展示与权益查询
+
+### 测试
+
+- [ ] token 参数测试
+
+## [v2.0] — 报表（对齐根 v2.0）
+
+### 交付物
+
+- [ ] assessment stats 报表（成绩分布 / 及格率）
+- [ ] 考勤统计报表
+
+### 测试
+
+- [ ] 报表输出测试

@@ -1,23 +1,45 @@
 # ROADMAP
 
-> 本 scope 规划对齐根 [ROADMAP.md](../../ROADMAP.md) 的迁移阶段。
+> 本 scope 规划对齐根 [ROADMAP.md](../../ROADMAP.md) 的能力演进阶段。
 
-## [v0.3] — LMS 页面迁移
+## [v1.0] — 端到端打通（对齐根 v1.0）
 
-> **目标**：承接 `qtclass` 与 `qtcloud-course` 的全部 LMS 页面，两仓库回归单一职责。
+> **目标**：默认对接 provider `/api/v1`，本地 assets 仅作离线回退。
 
 ### 交付物
 
-- [x] 登录页（飞书登录 · 本地模拟）
-- [x] 我的课程 / 选课报名页
-- [x] 学习进度页
-- [x] 课表（自 `qtclass` schedule）与考勤（自 `qtclass` classroom）
-- [x] 考核列表 / 详情 / 提交（自 `qtcloud-course` assessment）
-- [x] 班级管理页 + 仪表盘（自 `qtcloud-course` class / dashboard）
-- [x] 学习记录由 localStorage 改为服务端进度数据
-- [x] 模型 / 服务全量迁移（student / teacher / class_teaching / assessment / submission / enums、data_service / app_state），明细见根 ROADMAP 的 `docs/lms-inventory.md`
+- [ ] 默认 baseUrl 指向 provider，assets 降级为离线回退
+- [ ] 加载 / 错误 / 重试状态完善
+- [ ] 端到端联调：登录 → 选课 → 上报进度 → 查看成绩
 
 ### 测试
 
-- [x] 各页面 widget 测试
-- [x] `qtclass` 移除 LMS 模块后播放器测试保持全绿
+- [ ] 集成测试（mock provider 或真实 provider）
+- [ ] 离线回退测试
+
+## [v1.1] — 登录与角色视图（对齐根 v1.1）
+
+> **目标**：替换本地模拟登录。
+
+### 交付物
+
+- [ ] 飞书登录（OAuth 跳转 / token）
+- [ ] 按角色（管理员 / 讲师 / 学生）展示不同导航与操作
+
+### 测试
+
+- [ ] 登录流程 widget 测试
+- [ ] 角色视图测试
+
+## [v2.0] — 学习体验（对齐根 v2.0）
+
+### 交付物
+
+- [ ] 学员侧播放器（与 `qtclass` 集成，进度回写服务端）
+- [ ] 考核作答页（题型 / 计时 / 自动评分展示）
+- [ ] 考勤与成绩报表页
+
+### 测试
+
+- [ ] 播放器进度同步测试
+- [ ] 考核全流程 widget 测试

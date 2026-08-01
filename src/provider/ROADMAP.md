@@ -1,20 +1,44 @@
 # ROADMAP
 
-> 本 scope 规划对齐根 [ROADMAP.md](../../ROADMAP.md) 的迁移阶段。
+> 本 scope 规划对齐根 [ROADMAP.md](../../ROADMAP.md) 的能力演进阶段。
 
-## [v0.2] — LMS API 迁移
+## [v1.0] — 持久化与端到端（对齐根 v1.0）
 
-> **目标**：承接 `qtcloud-course/provider` 的 LMS API，成为学习云唯一服务端。
+> **目标**：内存 store 落盘，成为可重启不丢数据的服务端。
 
 ### 交付物
 
-- [x] 领域模型：Student / Teacher / Class / Session / Enrollment / Progress / Assessment / Submission
-- [x] Store + Handler：class / student / assessment / submission / enrollment / progress CRUD
-- [x] 路由注册（`/api/v1/...`）与健康检查
-- [x] 从 `qtcloud-course/provider` 移植 class.go（domain / store / handler）
+- [ ] 文件持久化：BaseStore 落盘到 `data/` 目录（JSON 快照），重启加载
+- [ ] 数据迁移工具：旧 assets JSON 导入 provider
+- [ ] 配置：数据目录 / 监听地址可配置
 
 ### 测试
 
-- [x] 移植的 CRUD 测试全部通过
-- [x] 新增 enrollment / progress API 测试
-- [x] 健康检查 `/healthz` 测试
+- [ ] 持久化测试（重启后数据仍在）
+- [ ] 导入工具测试
+
+## [v1.1] — 认证与权限（对齐根 v1.1）
+
+> **目标**：真实飞书登录与角色权限。
+
+### 交付物
+
+- [ ] 飞书 OAuth 登录 API
+- [ ] 角色权限中间件（管理员 / 讲师 / 学生）
+- [ ] token 签发与校验
+
+### 测试
+
+- [ ] 认证 API 测试
+- [ ] 权限中间件测试
+
+## [v2.0] — 业务增强（对齐根 v2.0）
+
+### 交付物
+
+- [ ] 考核自动评分 / 计时
+- [ ] 考勤与成绩统计 API
+
+### 测试
+
+- [ ] 统计 API 测试
