@@ -4,12 +4,14 @@ package main
 import (
 	"log"
 	"net/http"
+
+	"github.com/quanttide/qtcloud-learn-provider/internal/version"
 )
 
 func main() {
 	addr := ":8080"
-	log.Printf("qtcloud-learn provider listening on %s", addr)
-	if err := http.ListenAndServe(addr, handler()); err != nil {
+	log.Printf("qtcloud-learn provider %s listening on %s", version.Version, addr)
+	if err := http.ListenAndServe(addr, newRouter()); err != nil {
 		log.Fatal(err)
 	}
 }

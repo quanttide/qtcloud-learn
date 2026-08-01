@@ -63,3 +63,31 @@
 | Progress（学习进度） | `qtcloud-course` Class.progress + `qtclass` learning_record |
 | Assessment / Submission（考核 / 提交） | `qtcloud-course` |
 | LearningRecord（学习记录） | `qtclass` learning_record.dart（转为服务端进度数据） |
+
+## 迁移状态
+
+| 阶段 | 状态 | 说明 |
+|------|------|------|
+| v0.2 Provider（Go） | ✅ 已完成 | 领域模型 + 6 资源 CRUD + `/api/v1` 路由已落地；`class.go`（domain / store / handler）已移植 |
+| v0.3 Studio（Flutter） | ⬜ 待开始 | — |
+| v0.4 CLI（Rust） | ⬜ 待开始 | — |
+| v0.5 旧代码移除 | ⬜ 待开始 | — |
+
+## 统一领域模型字段映射（v0.1 三仓库对齐核对）
+
+| qtcloud-learn 字段 | 来源 | 说明 |
+|------|------|------|
+| Student.ID / Name / Email / Avatar | `qtcloud-course` student.dart | 学员基本信息 |
+| Student.Plan（free / paid / vip） | 新增 | 付费 / VIP 权益 |
+| Student.attendance | `qtclass` session.dart Student | 不随学员存储，归入 Session.Attendances |
+| Teacher.ID / Name / Email / Title | `qtcloud-course` teacher.dart（title）+ `qtclass` session.dart Teacher | 讲师 |
+| Class.ID / Name / Slug / RefName / RefType / RefID / Status / StartDate / EndDate / StudentCount / Progress | `qtcloud-course` class.go + class_teaching.dart | 班级 |
+| Class.TeacherIDs / StudentIDs | `qtcloud-course` class_teaching.dart | 成员引用 |
+| Session.ClassID / LessonTitle / TeacherID / StartTime / DurationMinutes / Location / Status | `qtclass` session.dart | 课次；className / courseName 由 ClassID 关联派生 |
+| Session.Attendances（StudentID / Status） | `qtclass` session.dart AttendanceStatus | 考勤 |
+| Enrollment.ClassID / StudentID / Status / EnrolledAt | 新增 | 选课 / 报名 |
+| Progress.StudentID / ClassID / Percent / Finished / UpdatedAt | `qtcloud-course` Class.progress + `qtclass` learning_record.finished | 学习记录转为服务端进度数据 |
+| Assessment.ClassID / Type / Title / FullScore / PassScore / Deadline | `qtcloud-course` assessment.dart | 考核 |
+| Submission.AssessmentID / StudentID / Status / Score / Comment / SubmittedAt | `qtcloud-course` submission.dart | 提交 |
+
+> 说明：`qtclass` learning_record.dart 的 env / runState 为播放器环境细节，不纳入统一进度模型。

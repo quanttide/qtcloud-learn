@@ -8,13 +8,13 @@
 
 ### 交付物
 
-- [ ] 领域模型：Student / Teacher / Class / Session / Enrollment / Progress / Assessment / Submission
-- [ ] Store + Handler：class / student / assessment / submission / enrollment / progress CRUD
-- [ ] 路由注册（`/api/v1/...`）与健康检查
-- [ ] 从 `qtcloud-course/provider` 移植 class.go（domain / store / handler）
+- [x] 领域模型：Student / Teacher / Class / Session / Enrollment / Progress / Assessment / Submission
+- [x] Store + Handler：class / student / assessment / submission / enrollment / progress CRUD
+- [x] 路由注册（`/api/v1/...`）与健康检查
+- [x] 从 `qtcloud-course/provider` 移植 class.go（domain / store / handler）
 
 ### 测试
 
-- [ ] 移植的 CRUD 测试全部通过
-- [ ] 新增 enrollment / progress API 测试
-- [ ] 健康检查 `/healthz` 测试
+- [x] 移植的 CRUD 测试全部通过
+- [x] 新增 enrollment / progress API 测试
+- [x] 健康检查 `/healthz` 测试

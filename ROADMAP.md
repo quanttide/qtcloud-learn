@@ -34,12 +34,12 @@
 ### 交付物
 
 - [x] 盘点两仓库 LMS 代码清单（见 `docs/lms-inventory.md`）
-- [ ] `qtclass` / `qtcloud-course` 声明冻结 LMS 功能迭代（落点：`qtcloud-course/ROADMAP.md`、`qtclass/STATUS.md`）
-- [ ] 定义 `qtcloud-learn` 统一领域模型：Student / Teacher / Class / Session / Enrollment / Progress / Assessment / Submission；LearningRecord 不独立建模，并入 Progress 作为服务端进度数据
+- [x] `qtclass` / `qtcloud-course` 声明冻结 LMS 功能迭代（落点：`qtcloud-course/ROADMAP.md`、`qtclass/STATUS.md`）
+- [x] 定义 `qtcloud-learn` 统一领域模型：Student / Teacher / Class / Session / Enrollment / Progress / Assessment / Submission；LearningRecord 不独立建模，并入 Progress 作为服务端进度数据
 
 ### 测试
 
-- [ ] 三仓库模型字段对齐核对（qtclass ↔ qtcloud-course ↔ qtcloud-learn）
+- [x] 三仓库模型字段对齐核对（qtclass ↔ qtcloud-course ↔ qtcloud-learn）
 
 ## [v0.2] — Provider 迁移（Go 服务端）
 
@@ -47,16 +47,16 @@
 
 ### 交付物
 
-- [ ] 领域模型：Student / Teacher / Class / Session / Enrollment / Progress / Assessment / Submission
-- [ ] Store + Handler：class / student / assessment / submission / enrollment / progress 的 CRUD
-- [ ] 路由注册（`/api/v1/...`）与健康检查
-- [ ] 从 `qtcloud-course/provider` 移植 `class.go`（domain / store / handler）与测试
+- [x] 领域模型：Student / Teacher / Class / Session / Enrollment / Progress / Assessment / Submission
+- [x] Store + Handler：class / student / assessment / submission / enrollment / progress 的 CRUD
+- [x] 路由注册（`/api/v1/...`）与健康检查
+- [x] 从 `qtcloud-course/provider` 移植 `class.go`（domain / store / handler）与测试
 
 ### 测试
 
-- [ ] 移植的 CRUD 测试全部通过
-- [ ] 新增 enrollment / progress API 测试
-- [ ] 健康检查 `/healthz` 测试
+- [x] 移植的 CRUD 测试全部通过
+- [x] 新增 enrollment / progress API 测试
+- [x] 健康检查 `/healthz` 测试
 
 ## [v0.3] — Studio 迁移（Flutter 客户端）
 
