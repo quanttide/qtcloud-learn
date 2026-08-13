@@ -1,6 +1,6 @@
 # 量潮学习云 · Studio 文档索引
 
-> 学员端（前台）与 LMS 管理后台的页面 / 组件规格。
+> LMS 管理后台页面与通用组件规格。
 > 分解自实验室创新系统原型 v0.12（2026-08-07）。
 
 ---
@@ -21,15 +21,13 @@ Course（课程）
 
 ---
 
-## 屏幕清单（3 屏）
+## 屏幕清单（1 屏）
 
 | 顺序 | 屏幕 | 视图 ID | 文档 |
 |------|------|---------|------|
-| 1 | 课程列表页 | `view-courses` | [course-list.md](screens/course-list.md) |
-| 2 | 课程详情页 | `view-front` / `view-generic` | [course-detail.md](screens/course-detail.md) |
-| 3 | LMS 管理后台 | `view-back` | [backend-lms.md](screens/backend-lms.md) |
+| 1 | LMS 管理后台 | `view-back` | [backend-lms.md](screens/backend-lms.md) |
 
-> 课程详情页包含**课程首页（Hero）**和**课时列表**两个区域，合为一个页面。
+> 课程列表页与课程详情页已按职责拆出：**编辑页面**归 qtcloud-course（课程制作），**展示页面**归 qtclass（客户端），本仓库仅保留后台管理规格。
 
 ---
 
