@@ -23,4 +23,4 @@ src/
 
 ## 开发
 
-见 [docs/dev-guide.md](docs/dev-guide.md)。
+见 [docs/dev-guide/index.md](docs/dev-guide/index.md)。
