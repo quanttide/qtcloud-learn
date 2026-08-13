@@ -21,13 +21,43 @@ Course（课程）
 
 ---
 
-## 屏幕清单（1 屏）
+## 屏幕清单（后台 14 页）
 
-| 顺序 | 屏幕 | 视图 ID | 文档 |
-|------|------|---------|------|
-| 1 | LMS 管理后台 | `view-back` | [backend-lms.md](screens/backend-lms.md) |
+### 框架与概览
 
-> 课程列表页与课程详情页已按职责拆出：**编辑页面**归 qtcloud-course（课程制作），**展示页面**归 qtclass（客户端），本仓库仅保留后台管理规格。
+| 屏幕 | 文档 |
+|------|------|
+| LMS 管理后台 · 框架页 | [admin.md](screens/admin.md) |
+| 概览（后台首页） | [dashboard.md](screens/dashboard.md) |
+
+### 学习管理
+
+| 屏幕 | 文档 |
+|------|------|
+| 课题管理 | [topic-management.md](screens/topic-management.md) |
+| 审批中心 | [approval-center.md](screens/approval-center.md) |
+| 双创项目管理 | [innovation-project.md](screens/innovation-project.md) |
+| 成果仓库 | [archive.md](screens/archive.md) |
+| 成员管理 | [member-management.md](screens/member-management.md) |
+| 课程管理 | [course-management.md](screens/course-management.md) |
+| 学员管理 | [student-management.md](screens/student-management.md) |
+
+### 表单配置
+
+| 屏幕 | 文档 |
+|------|------|
+| 立项申请表 | [apply-form.md](screens/apply-form.md) |
+| 阶段报告模板 | [stage-report-form.md](screens/stage-report-form.md) |
+| 验收评审表 | [review-form.md](screens/review-form.md) |
+
+### 关联系统
+
+| 屏幕 | 文档 |
+|------|------|
+| 课程研发 | [course-dev.md](screens/course-dev.md) |
+| 咨询/工单 | [consult.md](screens/consult.md) |
+
+> 原型中 LMS 管理后台为单页 13 板块（`view-back`），此处按板块拆分为独立页面文档，由框架页（admin.md）侧边栏导航串联。
 
 ---
 
