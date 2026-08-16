@@ -12,10 +12,9 @@ import (
 
 func TestApplicationPersistence(t *testing.T) {
 	dir := t.TempDir()
-	path := filepath.Join(dir, "applications.json")
 
 	s1 := NewApplicationStore()
-	s1.BaseStore.SetPersistPath(path)
+	s1.BaseStore.SetPersister(NewFilePersister(dir))
 	created := s1.Create(&domain.Application{
 		ProjectName:  "持久化项目",
 		BlindSpot:    "盲区",
@@ -32,7 +31,8 @@ func TestApplicationPersistence(t *testing.T) {
 
 	// 新实例模拟重启：Load 后数据仍在
 	s2 := NewApplicationStore()
-	if err := s2.BaseStore.Load(path); err != nil {
+	s2.BaseStore.SetPersister(NewFilePersister(dir))
+	if err := s2.BaseStore.Load("appl.json"); err != nil {
 		t.Fatalf("load: %v", err)
 	}
 	got, ok := s2.Get(created.ID)
@@ -51,17 +51,18 @@ func TestApplicationPersistence(t *testing.T) {
 
 	// 文件不存在时 Load 静默跳过（首启）
 	s3 := NewApplicationStore()
-	if err := s3.BaseStore.Load(filepath.Join(dir, "missing.json")); err != nil {
+	s3.BaseStore.SetPersister(NewFilePersister(dir))
+	if err := s3.BaseStore.Load("missing.json"); err != nil {
 		t.Errorf("missing file should be no-op, got %v", err)
 	}
 }
 
 func TestPersistFileWritten(t *testing.T) {
 	dir := t.TempDir()
-	path := filepath.Join(dir, "progress.json")
 	s := NewProgressStore()
-	s.BaseStore.SetPersistPath(path)
+	s.BaseStore.SetPersister(NewFilePersister(dir))
 	s.Create(&domain.Progress{StudentID: "stu-1", Percent: 0.5, Finished: false})
+	path := filepath.Join(dir, "prog.json")
 	if _, err := os.Stat(path); err != nil {
 		t.Fatalf("persist file not written: %v", err)
 	}

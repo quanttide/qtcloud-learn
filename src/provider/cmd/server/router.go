@@ -10,10 +10,27 @@ import (
 
 // newRouter 创建并配置所有路由，可单独测试。
 // LMS API 统一挂在 /api/v1 前缀下。
-// 持久化：DATA_DIR 环境变量非空时，学员/进度/立项三个后台核心实体
-// 启用 JSON 文件存储（重启不丢；RDS 后续版本接入）。
+// 持久化（学员/进度/立项三个后台核心实体）：
+//   - OSS_BUCKET 非空 → OSS 对象存储（生产 FC：实例盘不持久，跨实例/发版不丢）
+//   - 否则 DATA_DIR 非空 → 本地 JSON 文件（dev/测试）
+//   - 都为空 → 纯内存（测试默认）
 func newRouter() *http.ServeMux {
-	dataDir := os.Getenv("DATA_DIR")
+	var persister store.Persister
+	if bucket := os.Getenv("OSS_BUCKET"); bucket != "" {
+		var err error
+		persister, err = store.NewOSSPersister(
+			bucket,
+			os.Getenv("OSS_ENDPOINT"),
+			os.Getenv("OSS_KEY_PREFIX"),
+			os.Getenv("ALIYUN_ACCESS_KEY_ID"),
+			os.Getenv("ALIYUN_ACCESS_KEY_SECRET"),
+		)
+		if err != nil {
+			panic(err)
+		}
+	} else if dataDir := os.Getenv("DATA_DIR"); dataDir != "" {
+		persister = store.NewFilePersister(dataDir)
+	}
 
 	classStore := store.NewClassStore()
 	studentStore := store.NewStudentStore()
@@ -25,16 +42,13 @@ func newRouter() *http.ServeMux {
 	progressStore := store.NewProgressStore()
 	applicationStore := store.NewApplicationStore()
 
-	if dataDir != "" {
-		if err := os.MkdirAll(dataDir, 0o755); err != nil {
-			panic(err)
-		}
-		applicationStore.BaseStore.SetPersistPath(dataDir + "/applications.json")
-		_ = applicationStore.BaseStore.Load(dataDir + "/applications.json")
-		studentStore.BaseStore.SetPersistPath(dataDir + "/students.json")
-		_ = studentStore.BaseStore.Load(dataDir + "/students.json")
-		progressStore.BaseStore.SetPersistPath(dataDir + "/progress.json")
-		_ = progressStore.BaseStore.Load(dataDir + "/progress.json")
+	if persister != nil {
+		applicationStore.BaseStore.SetPersister(persister)
+		_ = applicationStore.BaseStore.Load("applications.json")
+		studentStore.BaseStore.SetPersister(persister)
+		_ = studentStore.BaseStore.Load("students.json")
+		progressStore.BaseStore.SetPersister(persister)
+		_ = progressStore.BaseStore.Load("progress.json")
 	}
 
 	ch := handler.NewClassHandler(classStore)
