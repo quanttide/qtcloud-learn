@@ -1,12 +1,11 @@
-// 后台数据 API：学员/进度/立项（qtcloud-learn /api/v1，LMS 后台只读查看）。
+// 后台数据 API：学员档案/立项（qtcloud-learn，对齐原型契约 /api/learners + /api/proposals）。
 
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
 import '../models/application.dart';
-import '../models/progress.dart';
-import '../models/student.dart';
+import '../models/learner.dart';
 
 /// 默认后台 API 地址（--dart-define=QTCLOUD_LEARN_API_URL=... 注入生产网关）。
 String defaultAdminBaseUrl() {
@@ -14,7 +13,7 @@ String defaultAdminBaseUrl() {
   if (fromEnv.isNotEmpty) {
     return fromEnv;
   }
-  return 'http://localhost:8080/api/v1';
+  return 'http://localhost:8080';
 }
 
 class AdminApiException implements Exception {
@@ -32,25 +31,38 @@ class AdminApi {
   final http.Client _client;
   final String baseUrl;
 
-  Future<List<Student>> fetchStudents() async {
-    final body = await _get('/students');
-    return (body['students'] as List<dynamic>? ?? [])
-        .map((e) => Student.fromJson(e as Map<String, dynamic>))
+  /// 学员档案（后台学员表）。
+  Future<List<Learner>> fetchLearners() async {
+    final body = await _get('/api/learners');
+    return (body['learners'] as List<dynamic>? ?? [])
+        .map((e) => Learner.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 
-  Future<List<Progress>> fetchProgress() async {
-    final body = await _get('/progress');
-    return (body['progress'] as List<dynamic>? ?? [])
-        .map((e) => Progress.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
-
-  Future<List<Application>> fetchApplications() async {
-    final body = await _get('/applications');
-    return (body['applications'] as List<dynamic>? ?? [])
+  /// 立项列表（不含已删除）。
+  Future<List<Application>> fetchProposals() async {
+    final body = await _get('/api/proposals');
+    return (body['proposals'] as List<dynamic>? ?? [])
         .map((e) => Application.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  /// 软删除历史。
+  Future<List<Application>> fetchHistory() async {
+    final body = await _get('/api/proposals/history');
+    return (body['history'] as List<dynamic>? ?? [])
+        .map((e) => Application.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// 软删除立项。
+  Future<void> deleteProposal(String id) async {
+    final resp = await _client
+        .delete(Uri.parse('$baseUrl/api/proposals/$id'))
+        .timeout(const Duration(seconds: 15));
+    if (resp.statusCode != 200) {
+      throw AdminApiException('删除失败（HTTP ${resp.statusCode}）');
+    }
   }
 
   Future<Map<String, dynamic>> _get(String path) async {

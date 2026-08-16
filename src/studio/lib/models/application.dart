@@ -1,54 +1,61 @@
-/// 立项申请（生产实习第五步·微型创业）。
-/// teamMode: personal（个人独立，memberNames=[个人姓名]）/ partner（搭档，[队长, 队员]）。
+/// 立项申请（生产实习第五步·微型创业 Sell Your Demo，对齐原型 qt-proposals）。
+/// 5 问：机会/匹配/假设/Demo + 方向类型 + 组队方式姓名栏。
+/// teamMode: personal（个人独立，TeamLeader=本人）/ partner（搭档，队长+队员）。
 class Application {
   final String id;
   final String projectName;
-  final String blindSpot;
-  final String demoPlan;
-  final String direction;
+  final String opportunity;
+  final String fit;
+  final String hypothesis;
+  final String demo;
+  final String directionType;
   final String teamMode;
-  final List<String> memberNames;
-  final String studentId;
+  final String teamLeader;
+  final String teamMember;
   final String studentName;
   final String status;
-  final String? createdAt;
+  final String? submittedAt;
+  final String? deletedAt;
 
   const Application({
     required this.id,
     required this.projectName,
-    required this.blindSpot,
-    required this.demoPlan,
-    required this.direction,
+    required this.opportunity,
+    required this.fit,
+    required this.hypothesis,
+    required this.demo,
+    required this.directionType,
     required this.teamMode,
-    required this.memberNames,
-    required this.studentId,
+    required this.teamLeader,
+    required this.teamMember,
     required this.studentName,
     required this.status,
-    this.createdAt,
+    this.submittedAt,
+    this.deletedAt,
   });
 
   factory Application.fromJson(Map<String, dynamic> json) => Application(
     id: json['id'] as String? ?? '',
     projectName: json['projectName'] as String? ?? '',
-    blindSpot: json['blindSpot'] as String? ?? '',
-    demoPlan: json['demoPlan'] as String? ?? '',
-    direction: json['direction'] as String? ?? '',
+    opportunity: json['opportunity'] as String? ?? '',
+    fit: json['fit'] as String? ?? '',
+    hypothesis: json['hypothesis'] as String? ?? '',
+    demo: json['demo'] as String? ?? '',
+    directionType: json['directionType'] as String? ?? '',
     teamMode: json['teamMode'] as String? ?? '',
-    memberNames:
-        (json['memberNames'] as List<dynamic>? ?? []).map((e) => e as String).toList(),
-    studentId: json['studentId'] as String? ?? '',
+    teamLeader: json['teamLeader'] as String? ?? '',
+    teamMember: json['teamMember'] as String? ?? '',
     studentName: json['studentName'] as String? ?? '',
     status: json['status'] as String? ?? '',
-    createdAt: json['createdAt'] as String? ?? null,
+    submittedAt: json['submittedAt'] as String? ?? null,
+    deletedAt: json['deletedAt'] as String? ?? null,
   );
 
-  /// 姓名栏展示（个人独立 → 个人姓名；搭档 → 队长+队员）。
-  String get memberLabel {
-    final names = memberNames.where((n) => n.isNotEmpty).toList();
-    if (names.isEmpty) return '-';
-    if (teamMode == 'partner' && names.length > 1) {
-      return '队长：${names.first} / 队员：${names.sublist(1).join('、')}';
+  /// 组队展示：个人独立 → 个人姓名；搭档 → 队长+队员。
+  String get teamLabel {
+    if (teamMode == 'partner' && teamMember.isNotEmpty) {
+      return '队长：$teamLeader / 队员：$teamMember';
     }
-    return names.join('、');
+    return teamLeader;
   }
 }

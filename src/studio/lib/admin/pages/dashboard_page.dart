@@ -1,11 +1,10 @@
-// 后台概览：学员数 / 进度完成数 / 立项数统计卡（对齐规格 dashboard.md 最小版）。
+// 后台概览：学员数 / 在读与已完成 / 立项数统计卡。
 
 import 'package:flutter/material.dart';
 
 import '../admin_api.dart';
 import '../../models/application.dart';
-import '../../models/progress.dart';
-import '../../models/student.dart';
+import '../../models/learner.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key, required this.api});
@@ -17,9 +16,8 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  List<Student>? _students;
-  List<Progress>? _progress;
-  List<Application>? _applications;
+  List<Learner>? _learners;
+  List<Application>? _proposals;
   String? _error;
 
   @override
@@ -31,15 +29,13 @@ class _DashboardPageState extends State<DashboardPage> {
   Future<void> _load() async {
     try {
       final results = await Future.wait([
-        widget.api.fetchStudents(),
-        widget.api.fetchProgress(),
-        widget.api.fetchApplications(),
+        widget.api.fetchLearners(),
+        widget.api.fetchProposals(),
       ]);
       if (mounted) {
         setState(() {
-          _students = results[0] as List<Student>;
-          _progress = results[1] as List<Progress>;
-          _applications = results[2] as List<Application>;
+          _learners = results[0] as List<Learner>;
+          _proposals = results[1] as List<Application>;
           _error = null;
         });
       }
@@ -64,13 +60,12 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
       );
     }
-    final students = _students;
-    final progress = _progress;
-    final applications = _applications;
-    if (students == null || progress == null || applications == null) {
+    final learners = _learners;
+    final proposals = _proposals;
+    if (learners == null || proposals == null) {
       return const Center(child: CircularProgressIndicator());
     }
-    final finished = progress.where((p) => p.finished).length;
+    final finished = learners.where((l) => l.status == '已完成').length;
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
@@ -78,23 +73,11 @@ class _DashboardPageState extends State<DashboardPage> {
         const SizedBox(height: 16),
         Row(
           children: [
-            _StatCard(
-              icon: Icons.person_outline,
-              label: '学员数',
-              value: '${students.length}',
-            ),
+            _StatCard(icon: Icons.person_outline, label: '学员数', value: '${learners.length}'),
             const SizedBox(width: 16),
-            _StatCard(
-              icon: Icons.trending_up,
-              label: '进度记录',
-              value: '${progress.length}（完成 $finished）',
-            ),
+            _StatCard(icon: Icons.trending_up, label: '在读 / 已完成', value: '${learners.length - finished} / $finished'),
             const SizedBox(width: 16),
-            _StatCard(
-              icon: Icons.rocket_launch_outlined,
-              label: '立项申请',
-              value: '${applications.length}',
-            ),
+            _StatCard(icon: Icons.rocket_launch_outlined, label: '立项申请', value: '${proposals.length}'),
           ],
         ),
       ],

@@ -1,13 +1,12 @@
 // LMS 管理后台框架页（对齐规格 admin.md）：AppBar + 侧边栏 + 内容区。
-// v0.1 菜单收窄为后台核心三块：概览 / 学员 / 进度 / 立项。
+// v0.1 菜单收窄为后台核心三块：概览 / 学员 / 立项。
 
 import 'package:flutter/material.dart';
 
 import 'admin_api.dart';
 import 'pages/dashboard_page.dart';
-import 'pages/students_page.dart';
-import 'pages/progress_page.dart';
-import 'pages/applications_page.dart';
+import 'pages/learners_page.dart';
+import 'pages/proposals_page.dart';
 
 class AdminShell extends StatefulWidget {
   const AdminShell({super.key, required this.api});
@@ -25,9 +24,8 @@ class _AdminShellState extends State<AdminShell> {
   Widget build(BuildContext context) {
     final pages = [
       DashboardPage(api: widget.api),
-      StudentsPage(api: widget.api),
-      ProgressPage(api: widget.api),
-      ApplicationsPage(api: widget.api),
+      LearnersPage(api: widget.api),
+      ProposalsPage(api: widget.api),
     ];
     return Scaffold(
       appBar: AppBar(
@@ -58,10 +56,6 @@ class _AdminShellState extends State<AdminShell> {
                   icon: Icon(Icons.person_outline),
                   selectedIcon: Icon(Icons.person),
                   label: Text('学员'),
-                ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.trending_up),
-                  label: Text('进度'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.rocket_launch_outlined),
