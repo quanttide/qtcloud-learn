@@ -106,3 +106,20 @@ type Submission struct {
 	Comment      string  `json:"comment,omitempty"`
 	SubmittedAt  string  `json:"submittedAt"`
 }
+
+// Application 立项申请（生产实习第五步·微型创业）。
+// 学员填写提交，服务端存储、后台可查（v0.1 不做审批流，status 固定 submitted）。
+// teamMode: "personal"（个人独立，MemberNames=[个人姓名]）/ "partner"（搭档，[队长, 队员]）。
+type Application struct {
+	ID          string   `json:"id"`
+	ProjectName string   `json:"projectName"`
+	BlindSpot   string   `json:"blindSpot"`
+	DemoPlan    string   `json:"demoPlan"`
+	Direction   string   `json:"direction"`
+	TeamMode    string   `json:"teamMode"`
+	MemberNames []string `json:"memberNames"`
+	StudentID   string   `json:"studentId"`
+	StudentName string   `json:"studentName"`
+	Status      string   `json:"status"` // "submitted"（不做审批）
+	CreatedAt   string   `json:"createdAt,omitempty"`
+}

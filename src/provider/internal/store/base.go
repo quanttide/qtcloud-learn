@@ -1,17 +1,75 @@
 package store
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"sync"
 )
 
 // BaseStore 提供通用的内存存储骨架：List/Get/Delete 和 ID 生成。
 // 具体类型嵌入后只需实现 Create/Update（因字段各异）。
+// 持久化：SetPersistPath 后各 store 写操作尾部调 persist() 全量落盘，
+// 启动时 Load 恢复——JSON 文件存储，重启不丢（v0.1 MVP；RDS 后续版本接入）。
 type BaseStore[T any] struct {
 	mu       sync.RWMutex
 	data     map[string]*T
 	seq      int
 	idPrefix string
+
+	persistPath string
+}
+
+// SetPersistPath 启用文件持久化（全量快照，原子写：临时文件 + rename）。
+func (s *BaseStore[T]) SetPersistPath(path string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.persistPath = path
+}
+
+// Load 从 JSON 文件恢复数据（文件不存在时静默跳过——首启）。
+func (s *BaseStore[T]) Load(path string) error {
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var snapshot struct {
+		Data map[string]*T `json:"data"`
+		Seq  int           `json:"seq"`
+	}
+	if err := json.Unmarshal(raw, &snapshot); err != nil {
+		return fmt.Errorf("restore %s: %w", path, err)
+	}
+	if snapshot.Data != nil {
+		s.data = snapshot.Data
+	}
+	s.seq = snapshot.Seq
+	return nil
+}
+
+// persist 全量快照落盘（写操作后调用；未启用持久化时为空操作）。
+func (s *BaseStore[T]) persist() {
+	if s.persistPath == "" {
+		return
+	}
+	snapshot := struct {
+		Data map[string]*T `json:"data"`
+		Seq  int           `json:"seq"`
+	}{Data: s.data, Seq: s.seq}
+	raw, err := json.Marshal(snapshot)
+	if err != nil {
+		return
+	}
+	tmp := s.persistPath + ".tmp"
+	if err := os.WriteFile(tmp, raw, 0o644); err != nil {
+		return
+	}
+	_ = os.Rename(tmp, s.persistPath)
 }
 
 // NewBaseStore 创建泛型存储。

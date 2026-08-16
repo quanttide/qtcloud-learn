@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/quanttide/qtcloud-learn-provider/internal/handler"
 	"github.com/quanttide/qtcloud-learn-provider/internal/store"
@@ -9,7 +10,11 @@ import (
 
 // newRouter 创建并配置所有路由，可单独测试。
 // LMS API 统一挂在 /api/v1 前缀下。
+// 持久化：DATA_DIR 环境变量非空时，学员/进度/立项三个后台核心实体
+// 启用 JSON 文件存储（重启不丢；RDS 后续版本接入）。
 func newRouter() *http.ServeMux {
+	dataDir := os.Getenv("DATA_DIR")
+
 	classStore := store.NewClassStore()
 	studentStore := store.NewStudentStore()
 	teacherStore := store.NewTeacherStore()
@@ -18,6 +23,19 @@ func newRouter() *http.ServeMux {
 	submissionStore := store.NewSubmissionStore()
 	enrollmentStore := store.NewEnrollmentStore()
 	progressStore := store.NewProgressStore()
+	applicationStore := store.NewApplicationStore()
+
+	if dataDir != "" {
+		if err := os.MkdirAll(dataDir, 0o755); err != nil {
+			panic(err)
+		}
+		applicationStore.BaseStore.SetPersistPath(dataDir + "/applications.json")
+		_ = applicationStore.BaseStore.Load(dataDir + "/applications.json")
+		studentStore.BaseStore.SetPersistPath(dataDir + "/students.json")
+		_ = studentStore.BaseStore.Load(dataDir + "/students.json")
+		progressStore.BaseStore.SetPersistPath(dataDir + "/progress.json")
+		_ = progressStore.BaseStore.Load(dataDir + "/progress.json")
+	}
 
 	ch := handler.NewClassHandler(classStore)
 	sh := handler.NewStudentHandler(studentStore)
@@ -27,6 +45,7 @@ func newRouter() *http.ServeMux {
 	subh := handler.NewSubmissionHandler(submissionStore)
 	eh := handler.NewEnrollmentHandler(enrollmentStore)
 	ph := handler.NewProgressHandler(progressStore)
+	apph := handler.NewApplicationHandler(applicationStore)
 
 	mux := http.NewServeMux()
 
@@ -85,6 +104,11 @@ func newRouter() *http.ServeMux {
 	mux.HandleFunc("GET /api/v1/progress/{id}", ph.Get)
 	mux.HandleFunc("PUT /api/v1/progress/{id}", ph.Update)
 	mux.HandleFunc("DELETE /api/v1/progress/{id}", ph.Delete)
+
+	// Application（立项申请：学员提交 + 后台查看，v0.1 不做审批）
+	mux.HandleFunc("GET /api/v1/applications", apph.List)
+	mux.HandleFunc("POST /api/v1/applications", apph.Create)
+	mux.HandleFunc("GET /api/v1/applications/{id}", apph.Get)
 
 	// Health
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {

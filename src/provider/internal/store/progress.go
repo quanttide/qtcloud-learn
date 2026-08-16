@@ -17,6 +17,7 @@ func (s *ProgressStore) Create(p *domain.Progress) *domain.Progress {
 	clone := *p
 	clone.ID = s.nextID()
 	s.data[clone.ID] = &clone
+	s.persist()
 	return &clone
 }
 
@@ -32,5 +33,6 @@ func (s *ProgressStore) Update(p *domain.Progress) (*domain.Progress, bool) {
 	existing.Percent = p.Percent
 	existing.Finished = p.Finished
 	existing.UpdatedAt = p.UpdatedAt
+	s.persist()
 	return existing, true
 }

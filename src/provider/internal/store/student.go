@@ -17,6 +17,7 @@ func (s *StudentStore) Create(st *domain.Student) *domain.Student {
 	clone := *st
 	clone.ID = s.nextID()
 	s.data[clone.ID] = &clone
+	s.persist()
 	return &clone
 }
 
@@ -31,5 +32,6 @@ func (s *StudentStore) Update(st *domain.Student) (*domain.Student, bool) {
 	existing.Email = st.Email
 	existing.Avatar = st.Avatar
 	existing.Plan = st.Plan
+	s.persist()
 	return existing, true
 }
