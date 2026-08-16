@@ -1,0 +1,78 @@
+# 部署 LMS 后台：推送 admin/* tag 时构建（--target=lib/main_admin.dart）上传 OSS 并刷 CDN。
+# 架构：admin/* tag → Actions → OSS 桶（qtcloud-learn-admin，静态网站）→ CDN（lms.quanttide.com）
+# 前台（qtclass 学员端）在 qtclass 仓库部署，前后台分离各一个 HTML。
+
+name: Deploy Admin
+
+on:
+  push:
+    tags:
+      - 'admin/**'
+
+concurrency:
+  group: deploy-learn-admin
+  cancel-in-progress: false
+
+env:
+  OSS_BUCKET: qtcloud-learn-admin
+  OSS_ENDPOINT: oss-cn-hangzhou.aliyuncs.com
+  CDN_DOMAIN: lms.quanttide.com
+
+jobs:
+  build-and-deploy:
+    name: Build Admin Web & Deploy to OSS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.8'
+
+      - name: Build Web
+        working-directory: src/studio
+        run: |
+          flutter pub get
+          flutter build web --release --target=lib/main_admin.dart \
+            --dart-define=QTCLOUD_LEARN_API_URL=${{ vars.QTCLOUD_LEARN_API_URL }}
+
+      - name: Setup ossutil
+        uses: manyuanrong/setup-ossutil@v3.0
+        with:
+          endpoint: ${{ env.OSS_ENDPOINT }}
+          access-key-id: ${{ secrets.ALIYUN_ACCESS_KEY_ID }}
+          access-key-secret: ${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}
+
+      # 缓存策略分离：哈希产物长缓存；固定名入口文件 no-cache
+      - name: Upload to OSS（产物长缓存）
+        run: ossutil cp src/studio/build/web/ oss://${{ env.OSS_BUCKET }}/ -r -f --exclude "index.html" --exclude "main.dart.js" --exclude "flutter_bootstrap.js" --exclude "flutter.js" --exclude "manifest.json" --exclude "version.json" --meta=Cache-Control:public,max-age=31536000
+
+      - name: Upload to OSS（入口文件 no-cache）
+        run: |
+          for f in index.html main.dart.js flutter_bootstrap.js flutter.js manifest.json version.json flutter_service_worker.js favicon.png; do
+            ossutil cp "src/studio/build/web/$f" "oss://${{ env.OSS_BUCKET }}/$f" -f --meta=Cache-Control:no-cache
+          done
+
+      - name: Upload 404.html
+        run: |
+          printf '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>404</title></head><body><h1>404 Not Found</h1><p><a href="/">返回首页</a></p></body></html>' > 404.html
+          ossutil cp 404.html oss://${{ env.OSS_BUCKET }}/404.html -f --meta "Cache-Control:no-cache"
+
+      - name: Refresh CDN
+        run: |
+          pip install aliyun-python-sdk-cdn
+          python -c "
+          from aliyunsdkcore.client import AcsClient
+          from aliyunsdkcdn.request.v20180510.RefreshObjectCachesRequest import RefreshObjectCachesRequest
+          import os
+          cli = AcsClient(os.environ['ALIYUN_ACCESS_KEY_ID'], os.environ['ALIYUN_ACCESS_KEY_SECRET'], 'cn-hangzhou')
+          req = RefreshObjectCachesRequest()
+          req.set_ObjectPath('https://${{ env.CDN_DOMAIN }}/')
+          req.set_ObjectType('Directory')
+          cli.do_action_with_exception(req)
+          "
+        env:
+          ALIYUN_ACCESS_KEY_ID: ${{ secrets.ALIYUN_ACCESS_KEY_ID }}
+          ALIYUN_ACCESS_KEY_SECRET: ${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}
