@@ -16,14 +16,12 @@ func TestApplicationPersistence(t *testing.T) {
 	s1 := NewApplicationStore()
 	s1.BaseStore.SetPersister(NewFilePersister(dir))
 	created := s1.Create(&domain.Application{
-		ProjectName:  "持久化项目",
-		BlindSpot:    "盲区",
-		DemoPlan:     "方案",
-		TeamMode:     "personal",
-		MemberNames:  []string{"张三"},
-		StudentID:    "stu-1",
-		StudentName:  "张三",
-		Status:       "submitted",
+		ProjectName: "持久化项目",
+		Opportunity: "机会",
+		TeamMode:    "personal",
+		TeamLeader:  "张三",
+		StudentName: "张三",
+		Status:      "已提交",
 	})
 	if created.ID == "" {
 		t.Fatal("create failed")
@@ -39,12 +37,12 @@ func TestApplicationPersistence(t *testing.T) {
 	if !ok {
 		t.Fatalf("restored app %s not found", created.ID)
 	}
-	if got.ProjectName != "持久化项目" || len(got.MemberNames) != 1 || got.MemberNames[0] != "张三" {
+	if got.ProjectName != "持久化项目" || got.TeamLeader != "张三" {
 		t.Errorf("restored = %+v", got)
 	}
 
 	// 序号恢复：新创建的 ID 不与旧记录冲突
-	next := s2.Create(&domain.Application{ProjectName: "第二个", TeamMode: "personal", MemberNames: []string{"李四"}})
+	next := s2.Create(&domain.Application{ProjectName: "第二个", TeamMode: "personal", TeamLeader: "李四"})
 	if next.ID == created.ID {
 		t.Errorf("seq not restored: %s == %s", next.ID, created.ID)
 	}

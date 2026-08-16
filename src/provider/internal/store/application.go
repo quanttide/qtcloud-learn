@@ -21,10 +21,10 @@ func (s *ApplicationStore) Create(a *domain.Application) *domain.Application {
 	clone := *a
 	clone.ID = s.nextID()
 	if clone.Status == "" {
-		clone.Status = "submitted"
+		clone.Status = "已提交"
 	}
-	if clone.CreatedAt == "" {
-		clone.CreatedAt = time.Now().Format(time.RFC3339)
+	if clone.SubmittedAt == "" {
+		clone.SubmittedAt = time.Now().Format(time.RFC3339)
 	}
 	s.data[clone.ID] = &clone
 	s.persist()
@@ -39,12 +39,29 @@ func (s *ApplicationStore) Update(a *domain.Application) (*domain.Application, b
 		return nil, false
 	}
 	existing.ProjectName = a.ProjectName
-	existing.BlindSpot = a.BlindSpot
-	existing.DemoPlan = a.DemoPlan
-	existing.Direction = a.Direction
+	existing.Opportunity = a.Opportunity
+	existing.Fit = a.Fit
+	existing.Hypothesis = a.Hypothesis
+	existing.Demo = a.Demo
+	existing.DirectionType = a.DirectionType
 	existing.TeamMode = a.TeamMode
-	existing.MemberNames = a.MemberNames
+	existing.TeamLeader = a.TeamLeader
+	existing.TeamMember = a.TeamMember
 	existing.Status = a.Status
+	existing.DeletedAt = a.DeletedAt
 	s.persist()
 	return existing, true
+}
+
+// SoftDelete 软删除：记录 deletedAt，保留在列表中供历史查询。
+func (s *ApplicationStore) SoftDelete(id string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	existing, ok := s.data[id]
+	if !ok || existing.DeletedAt != "" {
+		return false
+	}
+	existing.DeletedAt = time.Now().Format(time.RFC3339)
+	s.persist()
+	return true
 }

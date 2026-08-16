@@ -107,19 +107,35 @@ type Submission struct {
 	SubmittedAt  string  `json:"submittedAt"`
 }
 
-// Application 立项申请（生产实习第五步·微型创业）。
-// 学员填写提交，服务端存储、后台可查（v0.1 不做审批流，status 固定 submitted）。
-// teamMode: "personal"（个人独立，MemberNames=[个人姓名]）/ "partner"（搭档，[队长, 队员]）。
+// Application 立项申请（生产实习第五步·微型创业 Sell Your Demo）。
+// 字段对齐原型 qt-proposals：5 问（机会/匹配/假设/Demo）+ 方向类型 + 组队姓名。
+// teamMode: "personal"（个人独立，TeamLeader=个人姓名）/ "partner"（搭档，队长+队员）。
+// v0.1 不做审批流，status 固定 "已提交"；删除为软删除（DeletedAt 非空进历史）。
 type Application struct {
-	ID          string   `json:"id"`
-	ProjectName string   `json:"projectName"`
-	BlindSpot   string   `json:"blindSpot"`
-	DemoPlan    string   `json:"demoPlan"`
-	Direction   string   `json:"direction"`
-	TeamMode    string   `json:"teamMode"`
-	MemberNames []string `json:"memberNames"`
-	StudentID   string   `json:"studentId"`
-	StudentName string   `json:"studentName"`
-	Status      string   `json:"status"` // "submitted"（不做审批）
-	CreatedAt   string   `json:"createdAt,omitempty"`
+	ID            string `json:"id"`
+	ProjectName   string `json:"projectName"`
+	Opportunity   string `json:"opportunity"`   // 发现的机会（谁遇到什么问题、现有方案哪里不够好）
+	Fit           string `json:"fit"`           // 为什么适合量潮（与已有业务/能力/资产的关系）
+	Hypothesis    string `json:"hypothesis"`    // 核心假设（两周后最想证明什么）
+	Demo          string `json:"demo"`          // 准备 Sale 什么 Demo
+	DirectionType string `json:"directionType"` // 方向类型（内容/数据/渠道/方法…）
+	TeamMode      string `json:"teamMode"`      // "personal" / "partner"
+	TeamLeader    string `json:"teamLeader"`    // 队长姓名（个人独立时=本人姓名）
+	TeamMember    string `json:"teamMember"`    // 队员姓名（多个顿号分隔；个人独立时空）
+	StudentName   string `json:"studentName"`   // 当前学员身份（组队时=队长姓名）
+	Status        string `json:"status"`        // "已提交"（不做审批）
+	SubmittedAt   string `json:"submittedAt,omitempty"`
+	DeletedAt     string `json:"deletedAt,omitempty"` // 软删除时间（非空=已删除）
+}
+
+// Learner 学员档案（原型 qt-students）：上报进度/提交立项时按姓名自动建档。
+type Learner struct {
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	Course       string `json:"course"`                 // 当前课程："生产实习"
+	ProgressMax  int    `json:"progressMax"`            // 已到模块数 X
+	ProgressTotal int   `json:"progressTotal"`          // 总模块数（5）
+	ActiveAt     string `json:"activeAt,omitempty"`     // 最近活跃
+	Status       string `json:"status"`                 // "在读" / "已完成"
+	ProjectName  string `json:"projectName,omitempty"`  // 最近立项项目名（有立项时显示 ✓）
 }

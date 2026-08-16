@@ -1,13 +1,16 @@
 package handler
 
-// 立项申请 API：提交（学员端 POST）+ 列表/详情（后台查看）。
-// v0.1 不做审批流，提交即 status=submitted 存档。
+// 立项申请 API（对齐原型 qt-proposals 契约）：
+//   POST   /api/proposals            提交立项（学员端，5 问 + 方向类型 + 组队姓名）
+//   GET    /api/proposals            后台列表（不含已删除）
+//   GET    /api/proposals/history    历史记录（软删除留痕）
+//   DELETE /api/proposals/{id}       软删除
+// v0.1 不做审批流，status 固定"已提交"。
 
 import (
 	"encoding/json"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/quanttide/qtcloud-learn-provider/internal/domain"
 )
@@ -18,88 +21,121 @@ type ApplicationStorer interface {
 	Get(id string) (*domain.Application, bool)
 	Create(a *domain.Application) *domain.Application
 	Update(a *domain.Application) (*domain.Application, bool)
+	SoftDelete(id string) bool
+}
+
+// LearnerUpserter 立项/进度上报时自动建档学员。
+type LearnerUpserter interface {
+	UpsertByName(name, course string, progressMax, progressTotal int, projectName string) *domain.Learner
 }
 
 // ApplicationHandler 立项申请。
 type ApplicationHandler struct {
-	store ApplicationStorer
+	store  ApplicationStorer
+	learner LearnerUpserter
 }
 
-func NewApplicationHandler(s ApplicationStorer) *ApplicationHandler {
-	return &ApplicationHandler{store: s}
+func NewApplicationHandler(s ApplicationStorer, l LearnerUpserter) *ApplicationHandler {
+	return &ApplicationHandler{store: s, learner: l}
 }
 
-// Create POST /api/v1/applications 提交立项（微型创业姓名栏：
-// teamMode=personal 时 MemberNames 为个人姓名；partner 时为队长+队员）。
+// Create POST /api/proposals 提交立项。
+// 姓名栏（赵追加需求）：teamMode=personal → TeamLeader=个人姓名；partner → TeamLeader=队长 + TeamMember=队员。
 func (h *ApplicationHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req struct {
-		ProjectName  string   `json:"projectName"`
-		BlindSpot    string   `json:"blindSpot"`
-		DemoPlan     string   `json:"demoPlan"`
-		Direction    string   `json:"direction"`
-		TeamMode     string   `json:"teamMode"`
-		MemberNames  []string `json:"memberNames"`
-		StudentID    string   `json:"studentId"`
-		StudentName  string   `json:"studentName"`
+		ProjectName   string `json:"projectName"`
+		Opportunity   string `json:"opportunity"`
+		Fit           string `json:"fit"`
+		Hypothesis    string `json:"hypothesis"`
+		Demo          string `json:"demo"`
+		DirectionType string `json:"directionType"`
+		TeamMode      string `json:"teamMode"`
+		TeamLeader    string `json:"teamLeader"`
+		TeamMember    string `json:"teamMember"`
+		StudentName   string `json:"studentName"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 	req.ProjectName = strings.TrimSpace(req.ProjectName)
-	req.BlindSpot = strings.TrimSpace(req.BlindSpot)
-	req.DemoPlan = strings.TrimSpace(req.DemoPlan)
 	req.TeamMode = strings.TrimSpace(req.TeamMode)
+	req.TeamLeader = strings.TrimSpace(req.TeamLeader)
 
 	switch {
 	case req.ProjectName == "":
 		writeError(w, http.StatusBadRequest, "projectName is required")
 		return
-	case req.BlindSpot == "":
-		writeError(w, http.StatusBadRequest, "blindSpot is required")
-		return
-	case req.DemoPlan == "":
-		writeError(w, http.StatusBadRequest, "demoPlan is required")
-		return
 	case req.TeamMode != "personal" && req.TeamMode != "partner":
 		writeError(w, http.StatusBadRequest, "teamMode must be personal or partner")
 		return
-	case len(req.MemberNames) == 0 || req.MemberNames[0] == "":
-		writeError(w, http.StatusBadRequest, "memberNames is required")
+	case req.TeamLeader == "":
+		writeError(w, http.StatusBadRequest, "teamLeader is required")
 		return
+	}
+	// 当前学员身份：优先表单姓名，兜底队长姓名（对齐原型 qt-learner 语义）
+	learnerName := strings.TrimSpace(req.StudentName)
+	if learnerName == "" {
+		learnerName = req.TeamLeader
 	}
 
 	app := h.store.Create(&domain.Application{
-		ProjectName: req.ProjectName,
-		BlindSpot:   req.BlindSpot,
-		DemoPlan:    req.DemoPlan,
-		Direction:   req.Direction,
-		TeamMode:    req.TeamMode,
-		MemberNames: req.MemberNames,
-		StudentID:   req.StudentID,
-		StudentName: req.StudentName,
-		Status:      "submitted",
-		CreatedAt:   time.Now().Format(time.RFC3339),
+		ProjectName:   req.ProjectName,
+		Opportunity:   req.Opportunity,
+		Fit:           req.Fit,
+		Hypothesis:    req.Hypothesis,
+		Demo:          req.Demo,
+		DirectionType: req.DirectionType,
+		TeamMode:      req.TeamMode,
+		TeamLeader:    req.TeamLeader,
+		TeamMember:    strings.TrimSpace(req.TeamMember),
+		StudentName:   learnerName,
+		Status:        "已提交",
 	})
+	// 自动建档学员：进度置满（提交立项 = 进度 100%）
+	if h.learner != nil {
+		h.learner.UpsertByName(learnerName, "生产实习", 5, 5, app.ProjectName)
+	}
 	writeJSON(w, http.StatusCreated, app)
 }
 
-// List GET /api/v1/applications 后台立项列表（新到旧）。
+// List GET /api/proposals 后台列表（最近提交在前，不含已删除）。
 func (h *ApplicationHandler) List(w http.ResponseWriter, r *http.Request) {
 	apps := h.store.List()
-	// 倒序：最近提交在前
-	for i, j := 0, len(apps)-1; i < j; i, j = i+1, j-1 {
-		apps[i], apps[j] = apps[j], apps[i]
+	out := make([]*domain.Application, 0, len(apps))
+	for _, a := range apps {
+		if a.DeletedAt == "" {
+			out = append(out, a)
+		}
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"applications": apps})
+	// 倒序：最近提交在前
+	for i, j := 0, len(out)-1; i < j; i, j = i+1, j-1 {
+		out[i], out[j] = out[j], out[i]
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"proposals": out})
 }
 
-// Get GET /api/v1/applications/{id} 单条详情。
-func (h *ApplicationHandler) Get(w http.ResponseWriter, r *http.Request) {
-	app, ok := h.store.Get(r.PathValue("id"))
-	if !ok {
-		writeError(w, http.StatusNotFound, "application not found")
+// History GET /api/proposals/history 软删除历史（含删除时间）。
+func (h *ApplicationHandler) History(w http.ResponseWriter, r *http.Request) {
+	apps := h.store.List()
+	out := make([]*domain.Application, 0, len(apps))
+	for _, a := range apps {
+		if a.DeletedAt != "" {
+			out = append(out, a)
+		}
+	}
+	// 倒序：最近删除在前
+	for i, j := 0, len(out)-1; i < j; i, j = i+1, j-1 {
+		out[i], out[j] = out[j], out[i]
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"history": out})
+}
+
+// Delete DELETE /api/proposals/{id} 软删除。
+func (h *ApplicationHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	if !h.store.SoftDelete(r.PathValue("id")) {
+		writeError(w, http.StatusNotFound, "proposal not found")
 		return
 	}
-	writeJSON(w, http.StatusOK, app)
+	writeJSON(w, http.StatusOK, map[string]any{"success": true})
 }

@@ -41,10 +41,13 @@ func newRouter() *http.ServeMux {
 	enrollmentStore := store.NewEnrollmentStore()
 	progressStore := store.NewProgressStore()
 	applicationStore := store.NewApplicationStore()
+	learnerStore := store.NewLearnerStore()
 
 	if persister != nil {
 		applicationStore.BaseStore.SetPersister(persister)
-		_ = applicationStore.BaseStore.Load("applications.json")
+		_ = applicationStore.BaseStore.Load("appl.json")
+		learnerStore.BaseStore.SetPersister(persister)
+		_ = learnerStore.BaseStore.Load("lea.json")
 		studentStore.BaseStore.SetPersister(persister)
 		_ = studentStore.BaseStore.Load("students.json")
 		progressStore.BaseStore.SetPersister(persister)
@@ -59,7 +62,8 @@ func newRouter() *http.ServeMux {
 	subh := handler.NewSubmissionHandler(submissionStore)
 	eh := handler.NewEnrollmentHandler(enrollmentStore)
 	ph := handler.NewProgressHandler(progressStore)
-	apph := handler.NewApplicationHandler(applicationStore)
+	apph := handler.NewApplicationHandler(applicationStore, learnerStore)
+	learnerh := handler.NewLearnerHandler(learnerStore, learnerStore)
 
 	mux := http.NewServeMux()
 
@@ -119,10 +123,15 @@ func newRouter() *http.ServeMux {
 	mux.HandleFunc("PUT /api/v1/progress/{id}", ph.Update)
 	mux.HandleFunc("DELETE /api/v1/progress/{id}", ph.Delete)
 
-	// Application（立项申请：学员提交 + 后台查看，v0.1 不做审批）
-	mux.HandleFunc("GET /api/v1/applications", apph.List)
-	mux.HandleFunc("POST /api/v1/applications", apph.Create)
-	mux.HandleFunc("GET /api/v1/applications/{id}", apph.Get)
+	// 立项申请（对齐原型契约 /api/proposals，v0.1 不做审批）
+	mux.HandleFunc("POST /api/proposals", apph.Create)
+	mux.HandleFunc("GET /api/proposals", apph.List)
+	mux.HandleFunc("GET /api/proposals/history", apph.History)
+	mux.HandleFunc("DELETE /api/proposals/{id}", apph.Delete)
+
+	// 学员档案（自动建档）+ 进度上报（对齐原型契约）
+	mux.HandleFunc("GET /api/learners", learnerh.List)
+	mux.HandleFunc("POST /api/courses/prod/progress", learnerh.ReportProgress)
 
 	// Health
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
