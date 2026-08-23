@@ -1,6 +1,6 @@
 # FC 默认角色：允许 FC 服务挂载弹性网卡访问 VPC（应用级）
 resource "alicloud_ram_role" "fc" {
-  role_name                   = "${local.app_name_prefix}-fc"
+  role_name = "${local.app_name_prefix}-fc"
   assume_role_policy_document = jsonencode({
     Statement = [{
       Action    = "sts:AssumeRole"
@@ -20,16 +20,16 @@ resource "alicloud_ram_role_policy_attachment" "fc_vpc" {
 
 # 函数计算（FC 3.0）：custom-container 容器镜像（数据持久化走 OSS）
 resource "alicloud_fcv3_function" "this" {
-  function_name = local.app_name_prefix
-  description   = "qtcloud-learn LMS API（学员/进度/立项）"
-  runtime       = "custom-container"
-  handler       = "index.handler"
-  cpu           = 0.5
-  memory_size   = var.fc_memory
-  disk_size     = 512
-  timeout       = var.fc_timeout
+  function_name   = local.app_name_prefix
+  description     = "qtcloud-learn LMS API（学员/进度/立项）"
+  runtime         = "custom-container"
+  handler         = "index.handler"
+  cpu             = 0.5
+  memory_size     = var.fc_memory
+  disk_size       = 512
+  timeout         = var.fc_timeout
   internet_access = true
-  role          = alicloud_ram_role.fc.arn
+  role            = alicloud_ram_role.fc.arn
 
   custom_container_config {
     image = var.image
@@ -37,11 +37,12 @@ resource "alicloud_fcv3_function" "this" {
   }
 
   environment_variables = {
-    OSS_BUCKET          = "qtcloud-learn-data"
-    OSS_ENDPOINT        = "https://oss-cn-hangzhou.aliyuncs.com"
-    OSS_KEY_PREFIX      = "fc/"
+    OSS_BUCKET               = "qtcloud-learn-data"
+    OSS_ENDPOINT             = "https://oss-cn-hangzhou.aliyuncs.com"
+    OSS_KEY_PREFIX           = "fc/"
     ALIYUN_ACCESS_KEY_ID     = var.oss_access_key_id
     ALIYUN_ACCESS_KEY_SECRET = var.oss_access_key_secret
+    JWT_PUBLIC_KEY           = var.jwt_public_key
   }
 
   tags = {

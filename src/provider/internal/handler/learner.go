@@ -20,12 +20,12 @@ type LearnerLister interface {
 
 // LearnerProgresser 进度上报所需。
 type LearnerProgresser interface {
-	UpsertByName(name, course string, progressMax, progressTotal int, projectName string) *domain.Learner
+	UpsertByName(name, course string, progressMax, progressTotal int, projectName, userID string) *domain.Learner
 }
 
 // LearnerHandler 学员档案。
 type LearnerHandler struct {
-	list LearnerLister
+	list   LearnerLister
 	upsert LearnerProgresser
 }
 
@@ -67,8 +67,8 @@ func (h *LearnerHandler) ReportProgress(w http.ResponseWriter, r *http.Request) 
 		writeError(w, http.StatusBadRequest, "invalid moduleId (m1..m5)")
 		return
 	}
-	// 上报进度：max 只增不减（upsert 语义）；5 模块课程
-	h.upsert.UpsertByName(req.Name, "生产实习", idx, 5, "")
+	// 上报进度：max 只增不减（upsert 语义）；5 模块课程；绑定登录账号（统一账号 JWT sub）
+	h.upsert.UpsertByName(req.Name, "生产实习", idx, 5, "", UserIDFrom(r))
 	writeJSON(w, http.StatusOK, map[string]any{"max": idx, "last": req.ModuleID})
 }
 

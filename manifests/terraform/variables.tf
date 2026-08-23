@@ -42,3 +42,9 @@ variable "oss_access_key_secret" {
   description = "OSS 持久化凭证（FC 环境变量注入）"
   type        = string
 }
+
+variable "jwt_public_key" {
+  description = "qtcloud-auth JWT RS256 公钥 PEM（FC 环境变量注入）"
+  type        = string
+  sensitive   = true
+}

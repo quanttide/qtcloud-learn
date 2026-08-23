@@ -79,8 +79,8 @@ func TestProposalCreatePartner(t *testing.T) {
 		t.Fatalf("status = %d", w.Code)
 	}
 	var app struct {
-		TeamLeader string `json:"teamLeader"`
-		TeamMember string `json:"teamMember"`
+		TeamLeader  string `json:"teamLeader"`
+		TeamMember  string `json:"teamMember"`
 		StudentName string `json:"studentName"`
 	}
 	json.NewDecoder(w.Body).Decode(&app)

@@ -15,14 +15,19 @@ func NewLearnerStore() *LearnerStore {
 	return &LearnerStore{BaseStore: NewBaseStore[domain.Learner]("lea")}
 }
 
-// UpsertByName 按姓名建档/更新（上报进度或提交立项时调用）。
+// UpsertByName 按账号/姓名建档或更新（上报进度或提交立项时调用）。
+// userID 非空时优先按账号匹配（统一账号体系下同名学员互不干扰），其次按姓名（历史数据兼容）。
 // progressMax 只增不减；返回更新后的档案。
-func (s *LearnerStore) UpsertByName(name, course string, progressMax, progressTotal int, projectName string) *domain.Learner {
+func (s *LearnerStore) UpsertByName(name, course string, progressMax, progressTotal int, projectName, userID string) *domain.Learner {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	var existing *domain.Learner
 	for _, l := range s.data {
-		if l.Name == name {
+		if userID != "" && l.UserID == userID {
+			existing = l
+			break
+		}
+		if userID == "" && l.Name == name {
 			existing = l
 			break
 		}
@@ -35,6 +40,7 @@ func (s *LearnerStore) UpsertByName(name, course string, progressMax, progressTo
 		}
 		learner := &domain.Learner{
 			ID:            s.nextID(),
+			UserID:        userID,
 			Name:          name,
 			Course:        course,
 			ProgressMax:   progressMax,
@@ -47,7 +53,7 @@ func (s *LearnerStore) UpsertByName(name, course string, progressMax, progressTo
 		s.persist()
 		return learner
 	}
-	// 更新：进度只增不减、活跃时间刷新、立项关联
+	// 更新：进度只增不减、活跃时间刷新、立项关联、账号绑定
 	if progressMax > existing.ProgressMax {
 		existing.ProgressMax = progressMax
 	}
@@ -55,6 +61,9 @@ func (s *LearnerStore) UpsertByName(name, course string, progressMax, progressTo
 	existing.ActiveAt = now
 	if projectName != "" {
 		existing.ProjectName = projectName
+	}
+	if userID != "" {
+		existing.UserID = userID
 	}
 	if existing.ProgressMax >= existing.ProgressTotal {
 		existing.Status = "已完成"

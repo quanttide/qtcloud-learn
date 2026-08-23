@@ -26,9 +26,9 @@ func TestRouter_LMSRoutes(t *testing.T) {
 	mux := newRouter()
 
 	cases := []struct {
-		name   string
-		path   string
-		body   string
+		name string
+		path string
+		body string
 	}{
 		{"classes", "/api/v1/classes", `{"name":"浙理班级","refId":"prog-1"}`},
 		{"students", "/api/v1/students", `{"name":"张三"}`},

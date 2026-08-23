@@ -26,12 +26,12 @@ type ApplicationStorer interface {
 
 // LearnerUpserter 立项/进度上报时自动建档学员。
 type LearnerUpserter interface {
-	UpsertByName(name, course string, progressMax, progressTotal int, projectName string) *domain.Learner
+	UpsertByName(name, course string, progressMax, progressTotal int, projectName, userID string) *domain.Learner
 }
 
 // ApplicationHandler 立项申请。
 type ApplicationHandler struct {
-	store  ApplicationStorer
+	store   ApplicationStorer
 	learner LearnerUpserter
 }
 
@@ -80,6 +80,7 @@ func (h *ApplicationHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app := h.store.Create(&domain.Application{
+		UserID:        UserIDFrom(r),
 		ProjectName:   req.ProjectName,
 		Opportunity:   req.Opportunity,
 		Fit:           req.Fit,
@@ -92,9 +93,9 @@ func (h *ApplicationHandler) Create(w http.ResponseWriter, r *http.Request) {
 		StudentName:   learnerName,
 		Status:        "已提交",
 	})
-	// 自动建档学员：进度置满（提交立项 = 进度 100%）
+	// 自动建档学员：进度置满（提交立项 = 进度 100%）；绑定登录账号
 	if h.learner != nil {
-		h.learner.UpsertByName(learnerName, "生产实习", 5, 5, app.ProjectName)
+		h.learner.UpsertByName(learnerName, "生产实习", 5, 5, app.ProjectName, UserIDFrom(r))
 	}
 	writeJSON(w, http.StatusCreated, app)
 }

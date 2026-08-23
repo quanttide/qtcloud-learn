@@ -65,6 +65,12 @@ func newRouter() *http.ServeMux {
 	apph := handler.NewApplicationHandler(applicationStore, learnerStore)
 	learnerh := handler.NewLearnerHandler(learnerStore, learnerStore)
 
+	// 统一账号鉴权（qtcloud-auth JWT 公钥验签；JWT_PUBLIC_KEY 未配置时中间件为 nil，仅限本地 dev/测试）
+	authMW, err := handler.NewAuthMiddleware()
+	if err != nil {
+		panic(err)
+	}
+
 	mux := http.NewServeMux()
 
 	// Class
@@ -123,15 +129,23 @@ func newRouter() *http.ServeMux {
 	mux.HandleFunc("PUT /api/v1/progress/{id}", ph.Update)
 	mux.HandleFunc("DELETE /api/v1/progress/{id}", ph.Delete)
 
-	// 立项申请（对齐原型契约 /api/proposals，v0.1 不做审批）
-	mux.HandleFunc("POST /api/proposals", apph.Create)
+	// 立项申请（对齐原型契约 /api/proposals，v0.1 不做审批；提交需登录，后台列表暂保持开放——后台鉴权下一版接 admin）
+	if authMW != nil {
+		mux.HandleFunc("POST /api/proposals", authMW.Wrap(apph.Create))
+	} else {
+		mux.HandleFunc("POST /api/proposals", apph.Create)
+	}
 	mux.HandleFunc("GET /api/proposals", apph.List)
 	mux.HandleFunc("GET /api/proposals/history", apph.History)
 	mux.HandleFunc("DELETE /api/proposals/{id}", apph.Delete)
 
-	// 学员档案（自动建档）+ 进度上报（对齐原型契约）
+	// 学员档案（自动建档）+ 进度上报（对齐原型契约；上报需登录）
+	if authMW != nil {
+		mux.HandleFunc("POST /api/courses/prod/progress", authMW.Wrap(learnerh.ReportProgress))
+	} else {
+		mux.HandleFunc("POST /api/courses/prod/progress", learnerh.ReportProgress)
+	}
 	mux.HandleFunc("GET /api/learners", learnerh.List)
-	mux.HandleFunc("POST /api/courses/prod/progress", learnerh.ReportProgress)
 
 	// Health
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {

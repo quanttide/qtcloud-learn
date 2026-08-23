@@ -30,12 +30,12 @@ type Class struct {
 	ID           string   `json:"id"`
 	Name         string   `json:"name"`
 	Slug         string   `json:"slug"`
-	RefName      string   `json:"refName"`            // 引用的专业/课程名称（展示用）
-	RefType      string   `json:"refType,omitempty"`  // 引用类型："program" / "course"
-	RefID        string   `json:"refId"`              // 引用的 Program/Course ID
-	Status       string   `json:"status,omitempty"`   // "preparing" / "active" / "ended"
-	StartDate    string   `json:"startDate"`          // ISO 日期
-	EndDate      string   `json:"endDate"`            // ISO 日期
+	RefName      string   `json:"refName"`           // 引用的专业/课程名称（展示用）
+	RefType      string   `json:"refType,omitempty"` // 引用类型："program" / "course"
+	RefID        string   `json:"refId"`             // 引用的 Program/Course ID
+	Status       string   `json:"status,omitempty"`  // "preparing" / "active" / "ended"
+	StartDate    string   `json:"startDate"`         // ISO 日期
+	EndDate      string   `json:"endDate"`           // ISO 日期
 	StudentCount int      `json:"studentCount,omitempty"`
 	Progress     float64  `json:"progress,omitempty"` // 教学进度（0.0 ~ 1.0）
 	TeacherIDs   []string `json:"teacherIds"`
@@ -49,10 +49,10 @@ type Session struct {
 	ClassID         string       `json:"classId"`
 	LessonTitle     string       `json:"lessonTitle"`
 	TeacherID       string       `json:"teacherId"`
-	StartTime       string       `json:"startTime"`       // ISO 时间
+	StartTime       string       `json:"startTime"` // ISO 时间
 	DurationMinutes int          `json:"durationMinutes"`
 	Location        string       `json:"location"`
-	Status          string       `json:"status"`          // "upcoming" / "inProgress" / "completed"
+	Status          string       `json:"status"` // "upcoming" / "inProgress" / "completed"
 	Attendances     []Attendance `json:"attendances"`
 }
 
@@ -113,6 +113,7 @@ type Submission struct {
 // v0.1 不做审批流，status 固定 "已提交"；删除为软删除（DeletedAt 非空进历史）。
 type Application struct {
 	ID            string `json:"id"`
+	UserID        string `json:"userId,omitempty"` // 提交者账号（qtcloud-auth JWT sub，统一账号）
 	ProjectName   string `json:"projectName"`
 	Opportunity   string `json:"opportunity"`   // 发现的机会（谁遇到什么问题、现有方案哪里不够好）
 	Fit           string `json:"fit"`           // 为什么适合量潮（与已有业务/能力/资产的关系）
@@ -130,12 +131,13 @@ type Application struct {
 
 // Learner 学员档案（原型 qt-students）：上报进度/提交立项时按姓名自动建档。
 type Learner struct {
-	ID           string `json:"id"`
-	Name         string `json:"name"`
-	Course       string `json:"course"`                 // 当前课程："生产实习"
-	ProgressMax  int    `json:"progressMax"`            // 已到模块数 X
-	ProgressTotal int   `json:"progressTotal"`          // 总模块数（5）
-	ActiveAt     string `json:"activeAt,omitempty"`     // 最近活跃
-	Status       string `json:"status"`                 // "在读" / "已完成"
-	ProjectName  string `json:"projectName,omitempty"`  // 最近立项项目名（有立项时显示 ✓）
+	ID            string `json:"id"`
+	UserID        string `json:"userId,omitempty"` // 关联账号（qtcloud-auth JWT sub，统一账号）
+	Name          string `json:"name"`
+	Course        string `json:"course"`                // 当前课程："生产实习"
+	ProgressMax   int    `json:"progressMax"`           // 已到模块数 X
+	ProgressTotal int    `json:"progressTotal"`         // 总模块数（5）
+	ActiveAt      string `json:"activeAt,omitempty"`    // 最近活跃
+	Status        string `json:"status"`                // "在读" / "已完成"
+	ProjectName   string `json:"projectName,omitempty"` // 最近立项项目名（有立项时显示 ✓）
 }

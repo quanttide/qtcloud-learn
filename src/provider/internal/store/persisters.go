@@ -46,7 +46,7 @@ func (p *FilePersister) Store(key string, data []byte) error {
 
 // OSSPersister OSS 对象存储后端（生产：FC 容器实例盘在重建后丢失，数据存 OSS 跨实例/发版不丢）。
 type OSSPersister struct {
-	bucket   *oss.Bucket
+	bucket    *oss.Bucket
 	keyPrefix string
 }
 

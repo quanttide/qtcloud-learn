@@ -72,6 +72,7 @@ jobs:
       ALICLOUD_REGION_ID: cn-hangzhou
       TF_VAR_oss_access_key_id: ${{ secrets.ALIYUN_ACCESS_KEY_ID }}
       TF_VAR_oss_access_key_secret: ${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}
+      TF_VAR_jwt_public_key: ${{ secrets.JWT_PUBLIC_KEY }}
 
     steps:
       - name: Checkout
