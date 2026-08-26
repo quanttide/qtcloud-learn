@@ -127,11 +127,11 @@ func TestCriterionHandler_CRUD(t *testing.T) {
 	assertStatus(t, w, 200)
 	assertJSONArray(t, w)
 
-	w = request(t, mux, "POST", "/criteria", `{"title":"vibe-coding/lesson1/zed-connection","description":"成功建立 Zed 连接"}`)
+	w = request(t, mux, "POST", "/criteria", `{"title":"会连接 Zed","description":"成功建立 Zed 连接"}`)
 	assertStatus(t, w, 201)
 	c := assertJSON(t, w)
 	cid := c["id"].(string)
-	if c["title"] != "vibe-coding/lesson1/zed-connection" || c["description"] != "成功建立 Zed 连接" {
+	if c["title"] != "会连接 Zed" || c["description"] != "成功建立 Zed 连接" {
 		t.Fatalf("Create = %v", c)
 	}
 
@@ -150,10 +150,10 @@ func TestCriterionHandler_CRUD(t *testing.T) {
 	w = request(t, mux, "GET", "/criteria/nonexistent", "")
 	assertStatus(t, w, 404)
 
-	w = request(t, mux, "PUT", fmt.Sprintf("/criteria/%s", cid), `{"title":"vibe-coding/lesson2/agent","description":"完成 Agent 任务"}`)
+	w = request(t, mux, "PUT", fmt.Sprintf("/criteria/%s", cid), `{"title":"会用 Agent 执行任务","description":"完成 Agent 任务"}`)
 	assertStatus(t, w, 200)
 	c = assertJSON(t, w)
-	if c["title"] != "vibe-coding/lesson2/agent" || c["description"] != "完成 Agent 任务" {
+	if c["title"] != "会用 Agent 执行任务" || c["description"] != "完成 Agent 任务" {
 		t.Fatalf("Update = %v", c)
 	}
 

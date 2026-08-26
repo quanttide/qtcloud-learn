@@ -48,16 +48,16 @@ func TestLearnerStore_CRUD(t *testing.T) {
 func TestCriterionStore_CRUD(t *testing.T) {
 	s := NewCriterionStore()
 
-	c := s.Create(&domain.Criterion{Title: "vibe-coding/lesson1/zed-connection", Description: "成功建立 Zed 连接"})
-	if c.ID == "" || c.Title != "vibe-coding/lesson1/zed-connection" || c.Description != "成功建立 Zed 连接" {
+	c := s.Create(&domain.Criterion{Title: "会连接 Zed", Description: "成功建立 Zed 连接"})
+	if c.ID == "" || c.Title != "会连接 Zed" || c.Description != "成功建立 Zed 连接" {
 		t.Fatalf("Create() = %+v", c)
 	}
 	if got := s.List(); len(got) != 1 {
 		t.Fatalf("List() = %d, want 1", len(got))
 	}
 
-	updated, ok := s.Update(&domain.Criterion{ID: c.ID, Title: "vibe-coding/lesson2/agent", Description: "完成 Agent 任务"})
-	if !ok || updated.Title != "vibe-coding/lesson2/agent" || updated.Description != "完成 Agent 任务" {
+	updated, ok := s.Update(&domain.Criterion{ID: c.ID, Title: "会用 Agent 执行任务", Description: "完成 Agent 任务"})
+	if !ok || updated.Title != "会用 Agent 执行任务" || updated.Description != "完成 Agent 任务" {
 		t.Fatalf("Update() = %+v", updated)
 	}
 	if _, ok := s.Update(&domain.Criterion{ID: "x"}); ok {

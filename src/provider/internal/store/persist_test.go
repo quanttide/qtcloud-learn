@@ -52,7 +52,7 @@ func TestPersistFileWritten(t *testing.T) {
 	dir := t.TempDir()
 	s := NewCriterionStore()
 	s.BaseStore.SetPersister(NewFilePersister(dir))
-	s.Create(&domain.Criterion{Title: "vibe-coding/lesson1/zed-connection", Description: "成功建立 Zed 连接"})
+	s.Create(&domain.Criterion{Title: "会连接 Zed", Description: "成功建立 Zed 连接"})
 	path := filepath.Join(dir, "cri.json")
 	if _, err := os.Stat(path); err != nil {
 		t.Fatalf("persist file not written: %v", err)
@@ -64,7 +64,7 @@ func TestDeletePersisted(t *testing.T) {
 
 	s1 := NewCriterionStore()
 	s1.BaseStore.SetPersister(NewFilePersister(dir))
-	created := s1.Create(&domain.Criterion{Title: "vibe-coding/lesson1/zed-connection", Description: "成功建立 Zed 连接"})
+	created := s1.Create(&domain.Criterion{Title: "会连接 Zed", Description: "成功建立 Zed 连接"})
 	if !s1.Delete(created.ID) {
 		t.Fatal("delete failed")
 	}

@@ -31,7 +31,7 @@ func TestRouter_SpecRoutes(t *testing.T) {
 		body string
 	}{
 		{"learners", "/learners", `{"user_id":"user-123"}`},
-		{"criteria", "/criteria", `{"title":"vibe-coding/lesson1/zed-connection","description":"成功建立 Zed 连接"}`},
+		{"criteria", "/criteria", `{"title":"会连接 Zed","description":"成功建立 Zed 连接"}`},
 		{"completions", "/completions", `{"learner_id":"lea-1","criterion_id":"cri-1"}`},
 	}
 	for _, tc := range cases {

@@ -12,11 +12,11 @@ type Learner struct {
 }
 
 // Criterion 验收标准：学习的原子单元，由课程档案定义。
-// 对齐 spec：id（标准标识）、title（语义标识，如 "vibe-coding/lesson1/zed-connection"）、
+// 对齐 spec：id（标准标识）、title（标准名称，人类可读）、
 // description（具体规则描述）。
 type Criterion struct {
 	ID          string `json:"id"`
-	Title       string `json:"title"`       // 语义标识，如 "vibe-coding/lesson1/zed-connection"
+	Title       string `json:"title"`       // 标准名称（人类可读，用于展示与检索）
 	Description string `json:"description"` // 具体规则描述
 }
 
