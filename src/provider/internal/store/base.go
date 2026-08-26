@@ -121,15 +121,3 @@ func (s *BaseStore[T]) Delete(id string) bool {
 	}
 	return ok
 }
-
-// NameExists 检查 name 是否已被占用。
-func (s *BaseStore[T]) NameExists(name string, getName func(*T) string) bool {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	for _, v := range s.data {
-		if getName(v) == name {
-			return true
-		}
-	}
-	return false
-}

@@ -34,5 +34,4 @@ assets/         # 离线演示数据（本地模式默认读取）
 
 ## 相关文档
 
-- [ROADMAP.md](ROADMAP.md) — 路线图
 - [CHANGELOG.md](CHANGELOG.md) — 变更记录

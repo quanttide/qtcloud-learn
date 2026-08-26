@@ -9,8 +9,9 @@ import (
 )
 
 // newRouter 创建并配置所有路由，可单独测试。
-// LMS API 统一挂在 /api/v1 前缀下。
-// 持久化（学员/进度/立项三个后台核心实体）：
+// API 统一挂在 /api/v1 前缀下，资源对齐《量潮学习管理标准》（docs/specification）：
+// Learner × Criterion → Completion。
+// 持久化（Learner / Criterion / Completion 三个实体）：
 //   - OSS_BUCKET 非空 → OSS 对象存储（生产 FC：实例盘不持久，跨实例/发版不丢）
 //   - 否则 DATA_DIR 非空 → 本地 JSON 文件（dev/测试）
 //   - 都为空 → 纯内存（测试默认）
@@ -32,120 +33,45 @@ func newRouter() *http.ServeMux {
 		persister = store.NewFilePersister(dataDir)
 	}
 
-	classStore := store.NewClassStore()
-	studentStore := store.NewStudentStore()
-	teacherStore := store.NewTeacherStore()
-	sessionStore := store.NewSessionStore()
-	assessmentStore := store.NewAssessmentStore()
-	submissionStore := store.NewSubmissionStore()
-	enrollmentStore := store.NewEnrollmentStore()
-	progressStore := store.NewProgressStore()
-	applicationStore := store.NewApplicationStore()
 	learnerStore := store.NewLearnerStore()
+	criterionStore := store.NewCriterionStore()
+	completionStore := store.NewCompletionStore()
 
 	if persister != nil {
-		applicationStore.BaseStore.SetPersister(persister)
-		_ = applicationStore.BaseStore.Load("appl.json")
 		learnerStore.BaseStore.SetPersister(persister)
 		_ = learnerStore.BaseStore.Load("lea.json")
-		studentStore.BaseStore.SetPersister(persister)
-		_ = studentStore.BaseStore.Load("students.json")
-		progressStore.BaseStore.SetPersister(persister)
-		_ = progressStore.BaseStore.Load("progress.json")
+		criterionStore.BaseStore.SetPersister(persister)
+		_ = criterionStore.BaseStore.Load("cri.json")
+		completionStore.BaseStore.SetPersister(persister)
+		_ = completionStore.BaseStore.Load("com.json")
 	}
 
-	ch := handler.NewClassHandler(classStore)
-	sh := handler.NewStudentHandler(studentStore)
-	th := handler.NewTeacherHandler(teacherStore)
-	sessh := handler.NewSessionHandler(sessionStore)
-	ah := handler.NewAssessmentHandler(assessmentStore)
-	subh := handler.NewSubmissionHandler(submissionStore)
-	eh := handler.NewEnrollmentHandler(enrollmentStore)
-	ph := handler.NewProgressHandler(progressStore)
-	apph := handler.NewApplicationHandler(applicationStore, learnerStore)
-	learnerh := handler.NewLearnerHandler(learnerStore, learnerStore)
-
-	// 统一账号鉴权（qtcloud-auth JWT 公钥验签；JWT_PUBLIC_KEY 未配置时中间件为 nil，仅限本地 dev/测试）
-	authMW, err := handler.NewAuthMiddleware()
-	if err != nil {
-		panic(err)
-	}
+	learnerh := handler.NewLearnerHandler(learnerStore)
+	crith := handler.NewCriterionHandler(criterionStore)
+	comh := handler.NewCompletionHandler(completionStore)
 
 	mux := http.NewServeMux()
 
-	// Class
-	mux.HandleFunc("GET /api/v1/classes", ch.List)
-	mux.HandleFunc("POST /api/v1/classes", ch.Create)
-	mux.HandleFunc("GET /api/v1/classes/{id}", ch.Get)
-	mux.HandleFunc("PUT /api/v1/classes/{id}", ch.Update)
-	mux.HandleFunc("DELETE /api/v1/classes/{id}", ch.Delete)
+	// Learner（学习者）
+	mux.HandleFunc("GET /api/v1/learners", learnerh.List)
+	mux.HandleFunc("POST /api/v1/learners", learnerh.Create)
+	mux.HandleFunc("GET /api/v1/learners/{id}", learnerh.Get)
+	mux.HandleFunc("PUT /api/v1/learners/{id}", learnerh.Update)
+	mux.HandleFunc("DELETE /api/v1/learners/{id}", learnerh.Delete)
 
-	// Student
-	mux.HandleFunc("GET /api/v1/students", sh.List)
-	mux.HandleFunc("POST /api/v1/students", sh.Create)
-	mux.HandleFunc("GET /api/v1/students/{id}", sh.Get)
-	mux.HandleFunc("PUT /api/v1/students/{id}", sh.Update)
-	mux.HandleFunc("DELETE /api/v1/students/{id}", sh.Delete)
+	// Criterion（验收标准）
+	mux.HandleFunc("GET /api/v1/criteria", crith.List)
+	mux.HandleFunc("POST /api/v1/criteria", crith.Create)
+	mux.HandleFunc("GET /api/v1/criteria/{id}", crith.Get)
+	mux.HandleFunc("PUT /api/v1/criteria/{id}", crith.Update)
+	mux.HandleFunc("DELETE /api/v1/criteria/{id}", crith.Delete)
 
-	// Teacher
-	mux.HandleFunc("GET /api/v1/teachers", th.List)
-	mux.HandleFunc("POST /api/v1/teachers", th.Create)
-	mux.HandleFunc("GET /api/v1/teachers/{id}", th.Get)
-	mux.HandleFunc("PUT /api/v1/teachers/{id}", th.Update)
-	mux.HandleFunc("DELETE /api/v1/teachers/{id}", th.Delete)
-
-	// Session（课次 / 考勤）
-	mux.HandleFunc("GET /api/v1/sessions", sessh.List)
-	mux.HandleFunc("POST /api/v1/sessions", sessh.Create)
-	mux.HandleFunc("GET /api/v1/sessions/{id}", sessh.Get)
-	mux.HandleFunc("PUT /api/v1/sessions/{id}", sessh.Update)
-	mux.HandleFunc("DELETE /api/v1/sessions/{id}", sessh.Delete)
-
-	// Assessment
-	mux.HandleFunc("GET /api/v1/assessments", ah.List)
-	mux.HandleFunc("POST /api/v1/assessments", ah.Create)
-	mux.HandleFunc("GET /api/v1/assessments/{id}", ah.Get)
-	mux.HandleFunc("PUT /api/v1/assessments/{id}", ah.Update)
-	mux.HandleFunc("DELETE /api/v1/assessments/{id}", ah.Delete)
-
-	// Submission
-	mux.HandleFunc("GET /api/v1/submissions", subh.List)
-	mux.HandleFunc("POST /api/v1/submissions", subh.Create)
-	mux.HandleFunc("GET /api/v1/submissions/{id}", subh.Get)
-	mux.HandleFunc("PUT /api/v1/submissions/{id}", subh.Update)
-	mux.HandleFunc("DELETE /api/v1/submissions/{id}", subh.Delete)
-
-	// Enrollment
-	mux.HandleFunc("GET /api/v1/enrollments", eh.List)
-	mux.HandleFunc("POST /api/v1/enrollments", eh.Create)
-	mux.HandleFunc("GET /api/v1/enrollments/{id}", eh.Get)
-	mux.HandleFunc("PUT /api/v1/enrollments/{id}", eh.Update)
-	mux.HandleFunc("DELETE /api/v1/enrollments/{id}", eh.Delete)
-
-	// Progress
-	mux.HandleFunc("GET /api/v1/progress", ph.List)
-	mux.HandleFunc("POST /api/v1/progress", ph.Create)
-	mux.HandleFunc("GET /api/v1/progress/{id}", ph.Get)
-	mux.HandleFunc("PUT /api/v1/progress/{id}", ph.Update)
-	mux.HandleFunc("DELETE /api/v1/progress/{id}", ph.Delete)
-
-	// 立项申请（对齐原型契约 /api/proposals，v0.1 不做审批；提交需登录，后台列表暂保持开放——后台鉴权下一版接 admin）
-	if authMW != nil {
-		mux.HandleFunc("POST /api/proposals", authMW.Wrap(apph.Create))
-	} else {
-		mux.HandleFunc("POST /api/proposals", apph.Create)
-	}
-	mux.HandleFunc("GET /api/proposals", apph.List)
-	mux.HandleFunc("GET /api/proposals/history", apph.History)
-	mux.HandleFunc("DELETE /api/proposals/{id}", apph.Delete)
-
-	// 学员档案（自动建档）+ 进度上报（对齐原型契约；上报需登录）
-	if authMW != nil {
-		mux.HandleFunc("POST /api/courses/prod/progress", authMW.Wrap(learnerh.ReportProgress))
-	} else {
-		mux.HandleFunc("POST /api/courses/prod/progress", learnerh.ReportProgress)
-	}
-	mux.HandleFunc("GET /api/learners", learnerh.List)
+	// Completion（完成记录）
+	mux.HandleFunc("GET /api/v1/completions", comh.List)
+	mux.HandleFunc("POST /api/v1/completions", comh.Create)
+	mux.HandleFunc("GET /api/v1/completions/{id}", comh.Get)
+	mux.HandleFunc("PUT /api/v1/completions/{id}", comh.Update)
+	mux.HandleFunc("DELETE /api/v1/completions/{id}", comh.Delete)
 
 	// Health
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {

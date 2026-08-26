@@ -6,9 +6,8 @@ import (
 	"github.com/quanttide/qtcloud-learn-provider/internal/domain"
 )
 
-// TestClassStore_CRUD 移植自 qtcloud-course/provider 的 TestClassStore_CRUD，扩展 TeacherIDs / StudentIDs。
-func TestClassStore_CRUD(t *testing.T) {
-	s := NewClassStore()
+func TestLearnerStore_CRUD(t *testing.T) {
+	s := NewLearnerStore()
 
 	if got := s.List(); len(got) != 0 {
 		t.Fatalf("List() = %d", len(got))
@@ -17,49 +16,28 @@ func TestClassStore_CRUD(t *testing.T) {
 		t.Fatal("Get() nonexistent ok = true")
 	}
 
-	c := s.Create(&domain.Class{
-		Name: "浙理班级", RefName: "大数据微专业", RefType: "program", RefID: "prog-1",
-		StartDate: "2026-09-01", EndDate: "2027-01-15", StudentCount: 30,
-		TeacherIDs: []string{"tea-1"}, StudentIDs: []string{"stu-1"},
-	})
-	if c.ID == "" || c.Name != "浙理班级" || c.StudentCount != 30 || c.Slug == "" {
-		t.Fatalf("Create() = %+v", c)
-	}
-	if len(c.TeacherIDs) != 1 || c.TeacherIDs[0] != "tea-1" {
-		t.Fatalf("Create().TeacherIDs = %v", c.TeacherIDs)
-	}
-	if len(c.StudentIDs) != 1 || c.StudentIDs[0] != "stu-1" {
-		t.Fatalf("Create().StudentIDs = %v", c.StudentIDs)
+	l := s.Create(&domain.Learner{UserID: "user-123"})
+	if l.ID == "" || l.UserID != "user-123" {
+		t.Fatalf("Create() = %+v", l)
 	}
 
-	// nil slices → 初始化为空切片
-	c2 := s.Create(&domain.Class{Name: "杭电班级", RefID: "prog-2"})
-	if c2.TeacherIDs == nil || c2.StudentIDs == nil {
-		t.Fatal("Create(): TeacherIDs/StudentIDs should not be nil")
-	}
-
+	s.Create(&domain.Learner{})
 	if got := s.List(); len(got) != 2 {
 		t.Fatalf("List() = %d, want 2", len(got))
 	}
 
-	updated, ok := s.Update(&domain.Class{ID: c.ID, Name: "浙理班级v2", RefName: "大数据微专业v2", RefType: "course", RefID: "cour-1", Status: "active", StartDate: "2026-09-15", EndDate: "2027-02-01", StudentCount: 35, Progress: 0.5, TeacherIDs: []string{"tea-2"}, StudentIDs: []string{"stu-1", "stu-2"}})
-	if !ok || updated.Name != "浙理班级v2" || updated.RefType != "course" || updated.StudentCount != 35 || updated.Progress != 0.5 {
+	updated, ok := s.Update(&domain.Learner{ID: l.ID, UserID: "user-456"})
+	if !ok || updated.UserID != "user-456" {
 		t.Fatalf("Update() = %+v", updated)
 	}
-	if len(updated.TeacherIDs) != 1 || updated.TeacherIDs[0] != "tea-2" {
-		t.Fatalf("Update().TeacherIDs = %v", updated.TeacherIDs)
-	}
-	if len(updated.StudentIDs) != 2 {
-		t.Fatalf("Update().StudentIDs = %v", updated.StudentIDs)
-	}
-	if _, ok := s.Update(&domain.Class{ID: "x"}); ok {
+	if _, ok := s.Update(&domain.Learner{ID: "x"}); ok {
 		t.Fatal("Update() nonexistent ok = true")
 	}
 
-	if ok := s.Delete(c.ID); !ok {
+	if ok := s.Delete(l.ID); !ok {
 		t.Fatal("Delete() ok = false")
 	}
-	if ok := s.Delete(c.ID); ok {
+	if ok := s.Delete(l.ID); ok {
 		t.Fatal("Delete() again ok = true")
 	}
 	if ok := s.Delete("x"); ok {
@@ -67,203 +45,59 @@ func TestClassStore_CRUD(t *testing.T) {
 	}
 }
 
-func TestStudentStore_CRUD(t *testing.T) {
-	s := NewStudentStore()
+func TestCriterionStore_CRUD(t *testing.T) {
+	s := NewCriterionStore()
 
-	if got := s.List(); len(got) != 0 {
-		t.Fatalf("List() = %d", len(got))
-	}
-	if _, ok := s.Get("x"); ok {
-		t.Fatal("Get() nonexistent ok = true")
-	}
-
-	st := s.Create(&domain.Student{Name: "张三", Email: "zhangsan@example.com", Plan: "free"})
-	if st.ID == "" || st.Name != "张三" || st.Email != "zhangsan@example.com" || st.Plan != "free" {
-		t.Fatalf("Create() = %+v", st)
-	}
-
-	s.Create(&domain.Student{Name: "李四", Plan: "vip"})
-	if got := s.List(); len(got) != 2 {
-		t.Fatalf("List() = %d, want 2", len(got))
-	}
-
-	updated, ok := s.Update(&domain.Student{ID: st.ID, Name: "张三丰", Email: "new@example.com", Avatar: "a.png", Plan: "paid"})
-	if !ok || updated.Name != "张三丰" || updated.Avatar != "a.png" || updated.Plan != "paid" {
-		t.Fatalf("Update() = %+v", updated)
-	}
-	if _, ok := s.Update(&domain.Student{ID: "x"}); ok {
-		t.Fatal("Update() nonexistent ok = true")
-	}
-
-	if ok := s.Delete(st.ID); !ok {
-		t.Fatal("Delete() ok = false")
-	}
-	if ok := s.Delete("x"); ok {
-		t.Fatal("Delete() nonexistent ok = true")
-	}
-}
-
-func TestAssessmentStore_CRUD(t *testing.T) {
-	s := NewAssessmentStore()
-
-	a := s.Create(&domain.Assessment{ClassID: "class-1", Type: "homework", Title: "作业1", FullScore: 100, PassScore: 60, Deadline: "2026-10-01"})
-	if a.ID == "" || a.Title != "作业1" || a.FullScore != 100 || a.Deadline != "2026-10-01" {
-		t.Fatalf("Create() = %+v", a)
+	c := s.Create(&domain.Criterion{Title: "vibe-coding/lesson1/zed-connection", Description: "成功建立 Zed 连接"})
+	if c.ID == "" || c.Title != "vibe-coding/lesson1/zed-connection" || c.Description != "成功建立 Zed 连接" {
+		t.Fatalf("Create() = %+v", c)
 	}
 	if got := s.List(); len(got) != 1 {
 		t.Fatalf("List() = %d, want 1", len(got))
 	}
 
-	updated, ok := s.Update(&domain.Assessment{ID: a.ID, ClassID: "class-1", Type: "exam", Title: "期中考试", FullScore: 150, PassScore: 90, Deadline: "2026-11-01"})
-	if !ok || updated.Type != "exam" || updated.Title != "期中考试" || updated.FullScore != 150 {
+	updated, ok := s.Update(&domain.Criterion{ID: c.ID, Title: "vibe-coding/lesson2/agent", Description: "完成 Agent 任务"})
+	if !ok || updated.Title != "vibe-coding/lesson2/agent" || updated.Description != "完成 Agent 任务" {
 		t.Fatalf("Update() = %+v", updated)
 	}
-	if _, ok := s.Update(&domain.Assessment{ID: "x"}); ok {
+	if _, ok := s.Update(&domain.Criterion{ID: "x"}); ok {
 		t.Fatal("Update() nonexistent ok = true")
 	}
 
-	if ok := s.Delete(a.ID); !ok {
+	if ok := s.Delete(c.ID); !ok {
 		t.Fatal("Delete() ok = false")
 	}
 }
 
-func TestSubmissionStore_CRUD(t *testing.T) {
-	s := NewSubmissionStore()
+func TestCompletionStore_CRUD(t *testing.T) {
+	s := NewCompletionStore()
 
-	sub := s.Create(&domain.Submission{AssessmentID: "assess-1", StudentID: "stu-1", Status: "submitted", SubmittedAt: "2026-09-30T10:00:00Z"})
-	if sub.ID == "" || sub.AssessmentID != "assess-1" || sub.StudentID != "stu-1" || sub.Status != "submitted" {
-		t.Fatalf("Create() = %+v", sub)
+	c := s.Create(&domain.Completion{LearnerID: "lea-1", CriterionID: "cri-1"})
+	if c.ID == "" || c.LearnerID != "lea-1" || c.CriterionID != "cri-1" {
+		t.Fatalf("Create() = %+v", c)
+	}
+	if c.Status != "not_completed" {
+		t.Fatalf("Create() default status = %q, want not_completed", c.Status)
+	}
+	if c.CreatedAt == "" || c.UpdatedAt == "" {
+		t.Fatalf("Create() timestamps missing: %+v", c)
 	}
 	if got := s.List(); len(got) != 1 {
 		t.Fatalf("List() = %d, want 1", len(got))
 	}
 
-	updated, ok := s.Update(&domain.Submission{ID: sub.ID, AssessmentID: "assess-1", StudentID: "stu-1", Status: "late", Score: 88.5, Comment: "不错", SubmittedAt: "2026-09-30T10:00:00Z"})
-	if !ok || updated.Status != "late" || updated.Score != 88.5 || updated.Comment != "不错" {
+	updated, ok := s.Update(&domain.Completion{ID: c.ID, LearnerID: "lea-1", CriterionID: "cri-1", Status: "completed"})
+	if !ok || updated.Status != "completed" {
 		t.Fatalf("Update() = %+v", updated)
 	}
-	if _, ok := s.Update(&domain.Submission{ID: "x"}); ok {
+	if updated.CreatedAt == "" || updated.UpdatedAt == "" {
+		t.Fatalf("Update() timestamps missing: %+v", updated)
+	}
+	if _, ok := s.Update(&domain.Completion{ID: "x"}); ok {
 		t.Fatal("Update() nonexistent ok = true")
 	}
 
-	if ok := s.Delete(sub.ID); !ok {
-		t.Fatal("Delete() ok = false")
-	}
-}
-
-func TestEnrollmentStore_CRUD(t *testing.T) {
-	s := NewEnrollmentStore()
-
-	e := s.Create(&domain.Enrollment{ClassID: "class-1", StudentID: "stu-1", Status: "enrolled", EnrolledAt: "2026-08-01"})
-	if e.ID == "" || e.ClassID != "class-1" || e.StudentID != "stu-1" || e.Status != "enrolled" {
-		t.Fatalf("Create() = %+v", e)
-	}
-	if got := s.List(); len(got) != 1 {
-		t.Fatalf("List() = %d, want 1", len(got))
-	}
-
-	updated, ok := s.Update(&domain.Enrollment{ID: e.ID, ClassID: "class-1", StudentID: "stu-1", Status: "withdrawn", EnrolledAt: "2026-08-01"})
-	if !ok || updated.Status != "withdrawn" {
-		t.Fatalf("Update() = %+v", updated)
-	}
-	if _, ok := s.Update(&domain.Enrollment{ID: "x"}); ok {
-		t.Fatal("Update() nonexistent ok = true")
-	}
-
-	if ok := s.Delete(e.ID); !ok {
-		t.Fatal("Delete() ok = false")
-	}
-}
-
-func TestTeacherStore_CRUD(t *testing.T) {
-	s := NewTeacherStore()
-
-	tr := s.Create(&domain.Teacher{Name: "王老师", Email: "wang@example.com", Title: "教授"})
-	if tr.ID == "" || tr.Name != "王老师" || tr.Title != "教授" {
-		t.Fatalf("Create() = %+v", tr)
-	}
-	if got := s.List(); len(got) != 1 {
-		t.Fatalf("List() = %d, want 1", len(got))
-	}
-
-	updated, ok := s.Update(&domain.Teacher{ID: tr.ID, Name: "王老师v2", Email: "w2@example.com", Title: "副教授"})
-	if !ok || updated.Name != "王老师v2" || updated.Title != "副教授" {
-		t.Fatalf("Update() = %+v", updated)
-	}
-	if _, ok := s.Update(&domain.Teacher{ID: "x"}); ok {
-		t.Fatal("Update() nonexistent ok = true")
-	}
-
-	if ok := s.Delete(tr.ID); !ok {
-		t.Fatal("Delete() ok = false")
-	}
-}
-
-func TestSessionStore_CRUD(t *testing.T) {
-	s := NewSessionStore()
-
-	sess := s.Create(&domain.Session{
-		ClassID: "class-1", LessonTitle: "Git 入门", TeacherID: "tea-1",
-		StartTime: "2026-09-02T09:00:00Z", DurationMinutes: 45, Location: "A-101",
-		Status: "upcoming", Attendances: []domain.Attendance{{StudentID: "stu-1", Status: "present"}},
-	})
-	if sess.ID == "" || sess.LessonTitle != "Git 入门" || sess.DurationMinutes != 45 {
-		t.Fatalf("Create() = %+v", sess)
-	}
-	if len(sess.Attendances) != 1 || sess.Attendances[0].Status != "present" {
-		t.Fatalf("Create().Attendances = %+v", sess.Attendances)
-	}
-
-	// nil attendances → 初始化为空切片
-	sess2 := s.Create(&domain.Session{ClassID: "class-1", LessonTitle: "无考勤课次"})
-	if sess2.Attendances == nil {
-		t.Fatal("Create(): Attendances should not be nil")
-	}
-
-	if got := s.List(); len(got) != 2 {
-		t.Fatalf("List() = %d, want 2", len(got))
-	}
-
-	updated, ok := s.Update(&domain.Session{
-		ID: sess.ID, ClassID: "class-1", LessonTitle: "Git 进阶", TeacherID: "tea-2",
-		StartTime: "2026-09-03T09:00:00Z", DurationMinutes: 60, Location: "B-202",
-		Status: "completed", Attendances: []domain.Attendance{{StudentID: "stu-1", Status: "absent"}},
-	})
-	if !ok || updated.LessonTitle != "Git 进阶" || updated.Status != "completed" {
-		t.Fatalf("Update() = %+v", updated)
-	}
-	if len(updated.Attendances) != 1 || updated.Attendances[0].Status != "absent" {
-		t.Fatalf("Update().Attendances = %+v", updated.Attendances)
-	}
-	if _, ok := s.Update(&domain.Session{ID: "x"}); ok {
-		t.Fatal("Update() nonexistent ok = true")
-	}
-
-	if ok := s.Delete(sess.ID); !ok {
-		t.Fatal("Delete() ok = false")
-	}
-}
-
-func TestProgressStore_CRUD(t *testing.T) {
-	s := NewProgressStore()
-
-	p := s.Create(&domain.Progress{StudentID: "stu-1", ClassID: "class-1", Percent: 0.0, Finished: false})
-	if p.ID == "" || p.StudentID != "stu-1" || p.ClassID != "class-1" || p.Percent != 0.0 {
-		t.Fatalf("Create() = %+v", p)
-	}
-	if got := s.List(); len(got) != 1 {
-		t.Fatalf("List() = %d, want 1", len(got))
-	}
-
-	updated, ok := s.Update(&domain.Progress{ID: p.ID, StudentID: "stu-1", ClassID: "class-1", Percent: 1.0, Finished: true, UpdatedAt: "2026-08-02"})
-	if !ok || updated.Percent != 1.0 || !updated.Finished || updated.UpdatedAt != "2026-08-02" {
-		t.Fatalf("Update() = %+v", updated)
-	}
-	if _, ok := s.Update(&domain.Progress{ID: "x"}); ok {
-		t.Fatal("Update() nonexistent ok = true")
-	}
-
-	if ok := s.Delete(p.ID); !ok {
+	if ok := s.Delete(c.ID); !ok {
 		t.Fatal("Delete() ok = false")
 	}
 }

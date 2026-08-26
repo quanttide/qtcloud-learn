@@ -2,6 +2,8 @@
 
 量潮学习云的 CLI 工具。Rust 编写。
 
+领域模型对齐《量潮学习管理标准》（`docs/specification`）：核心模型 **Learner × Criterion → Completion**。
+
 ## 开发
 
 ```bash
@@ -9,7 +11,7 @@
 cargo build
 
 # 运行（默认连接 http://localhost:8080 的 provider）
-./target/debug/qtcloud-learn --base-url http://localhost:8080 student list
+./target/debug/qtcloud-learn --base-url http://localhost:8080 learner list
 
 # 测试
 cargo test
@@ -19,11 +21,9 @@ cargo test
 
 | 子命令 | 操作 |
 |--------|------|
-| `student` | create / list / get |
-| `class` | create / list / get |
-| `enrollment` | enroll（选课）/ withdraw（退课）/ list |
-| `progress` | report（上报）/ get（查看） |
-| `assessment` | create / submit / grade / stats |
+| `learner` | create / list / get |
+| `criterion` | create / list / get |
+| `completion` | create / complete（标记完成）/ list / get |
 
 连接的是 `qtcloud-learn-provider`（`/api/v1`）。
 

@@ -2,6 +2,8 @@
 
 量潮学习云的服务端。Go 编写。
 
+领域模型对齐《量潮学习管理标准》（`docs/specification`）：核心模型 **Learner × Criterion → Completion**。
+
 ## 开发
 
 ```bash
@@ -16,7 +18,7 @@ go run ./cmd/server
 
 ```
 cmd/server/          # 服务入口与路由（/api/v1/*，/healthz）
-internal/domain/     # 统一领域模型（Student / Teacher / Class / Session / Enrollment / Progress / Assessment / Submission）
+internal/domain/     # 领域模型（Learner / Criterion / Completion）
 internal/store/      # 内存存储（BaseStore + 各实体 Store）
 internal/handler/    # CRUD handler（泛型 CRUDHandler + 各实体 Handler）
 internal/version/    # 版本信息
@@ -28,12 +30,9 @@ LMS API 统一挂在 `/api/v1/` 前缀下，每个资源提供标准 CRUD：
 
 | 资源 | 路径 |
 |------|------|
-| 班级 | `/api/v1/classes` |
-| 学员 | `/api/v1/students` |
-| 考核 | `/api/v1/assessments` |
-| 提交 | `/api/v1/submissions` |
-| 选课 | `/api/v1/enrollments` |
-| 进度 | `/api/v1/progress` |
+| 学习者 | `/api/v1/learners` |
+| 验收标准 | `/api/v1/criteria` |
+| 完成记录 | `/api/v1/completions` |
 
 健康检查：`GET /healthz`。
 

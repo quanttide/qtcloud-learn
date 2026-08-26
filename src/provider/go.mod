@@ -2,10 +2,7 @@ module github.com/quanttide/qtcloud-learn-provider
 
 go 1.26.0
 
-require (
-	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible
-	github.com/golang-jwt/jwt/v5 v5.3.1
-)
+require github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible
 
 require (
 	golang.org/x/time v0.15.0 // indirect

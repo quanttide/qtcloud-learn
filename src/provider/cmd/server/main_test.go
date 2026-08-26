@@ -21,8 +21,8 @@ func TestHealthz(t *testing.T) {
 	}
 }
 
-// TestRouter_LMSRoutes 冒烟测试：/api/v1 下各资源路由已注册并可创建/读取。
-func TestRouter_LMSRoutes(t *testing.T) {
+// TestRouter_SpecRoutes 冒烟测试：对齐 spec 的三个资源路由已注册并可创建/读取。
+func TestRouter_SpecRoutes(t *testing.T) {
 	mux := newRouter()
 
 	cases := []struct {
@@ -30,14 +30,9 @@ func TestRouter_LMSRoutes(t *testing.T) {
 		path string
 		body string
 	}{
-		{"classes", "/api/v1/classes", `{"name":"浙理班级","refId":"prog-1"}`},
-		{"students", "/api/v1/students", `{"name":"张三"}`},
-		{"teachers", "/api/v1/teachers", `{"name":"王老师"}`},
-		{"sessions", "/api/v1/sessions", `{"classId":"class-1","lessonTitle":"Git 入门"}`},
-		{"assessments", "/api/v1/assessments", `{"classId":"class-1","title":"作业1"}`},
-		{"submissions", "/api/v1/submissions", `{"assessmentId":"assess-1","studentId":"stu-1"}`},
-		{"enrollments", "/api/v1/enrollments", `{"classId":"class-1","studentId":"stu-1"}`},
-		{"progress", "/api/v1/progress", `{"studentId":"stu-1","classId":"class-1"}`},
+		{"learners", "/api/v1/learners", `{"user_id":"user-123"}`},
+		{"criteria", "/api/v1/criteria", `{"title":"vibe-coding/lesson1/zed-connection","description":"成功建立 Zed 连接"}`},
+		{"completions", "/api/v1/completions", `{"learner_id":"lea-1","criterion_id":"cri-1"}`},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

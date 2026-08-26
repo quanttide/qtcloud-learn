@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## [Unreleased]
+
+### Added
+
+- 子命令对齐《量潮学习管理标准》：learner / criterion / completion（含 `completion complete` 标记完成）
+
+### Removed
+
+- 移除已从 provider 砍掉的子命令：student / class / enrollment / progress / assessment
+
 ## [0.1.0] - 2026-08-01
 
 ### Added

@@ -62,7 +62,9 @@ fn spawn_server() -> String {
             let mut parts = first.split_whitespace();
             let method = parts.next().unwrap_or("GET").to_string();
             let path = parts.next().unwrap_or("/").to_string();
-            let body = String::from_utf8_lossy(&buf[header_end + 4..]).trim().to_string();
+            let body = String::from_utf8_lossy(&buf[header_end + 4..])
+                .trim()
+                .to_string();
 
             let (status, resp_body) = handle(&store, &seq, &method, &path, &body);
             let resp = format!(
@@ -123,9 +125,7 @@ fn handle(
                 Some(existing) => {
                     // 合并语义：仅覆盖请求体中的字段（与 provider 一致）
                     let mut merged = existing.clone();
-                    if let Ok(patch) =
-                        serde_json::from_str::<serde_json::Value>(body)
-                    {
+                    if let Ok(patch) = serde_json::from_str::<serde_json::Value>(body) {
                         if let Some(obj) = patch.as_object() {
                             for (k, v) in obj {
                                 merged[k] = v.clone();
@@ -148,200 +148,108 @@ fn client() -> ApiClient {
 }
 
 #[test]
-fn student_crud() {
+fn learner_crud() {
     let api = client();
-    let out = commands::student::run(
+    let out = commands::learner::run(
         &api,
-        commands::student::StudentCmd::Create {
-            name: "张三".into(),
-            email: Some("zhangsan@example.com".into()),
-            plan: Some("vip".into()),
+        commands::learner::LearnerCmd::Create {
+            user_id: Some("user-123".into()),
         },
     )
     .unwrap();
-    assert!(out.contains("已创建学员 students-1（张三，vip）"), "{out}");
+    assert!(
+        out.contains("已创建学习者 learners-1（user_id: user-123）"),
+        "{out}"
+    );
 
-    let out = commands::student::run(&api, commands::student::StudentCmd::List).unwrap();
-    assert!(out.contains("张三"), "{out}");
-    assert!(out.contains("vip"), "{out}");
+    let out = commands::learner::run(&api, commands::learner::LearnerCmd::List).unwrap();
+    assert!(out.contains("learners-1"), "{out}");
+    assert!(out.contains("user-123"), "{out}");
 
-    let out = commands::student::run(
+    let out = commands::learner::run(
         &api,
-        commands::student::StudentCmd::Get { id: "students-1".into() },
+        commands::learner::LearnerCmd::Get {
+            id: "learners-1".into(),
+        },
     )
     .unwrap();
-    assert!(out.contains("张三"), "{out}");
-    assert!(out.contains("zhangsan@example.com"), "{out}");
+    assert!(out.contains("learners-1"), "{out}");
+    assert!(out.contains("user-123"), "{out}");
 }
 
 #[test]
-fn class_crud() {
+fn criterion_crud() {
     let api = client();
-    let out = commands::class::run(
+    let out = commands::criterion::run(
         &api,
-        commands::class::ClassCmd::Create {
-            name: "浙理班级".into(),
-            ref_name: "大数据微专业".into(),
-            ref_id: "prog-1".into(),
-            ref_type: "program".into(),
-            start_date: Some("2026-09-01".into()),
-            end_date: Some("2027-01-15".into()),
+        commands::criterion::CriterionCmd::Create {
+            title: "vibe-coding/lesson1/zed-connection".into(),
+            description: "成功建立 Zed 连接".into(),
         },
     )
     .unwrap();
-    assert!(out.contains("已创建班级 classes-1（浙理班级）"), "{out}");
+    assert!(
+        out.contains("已创建验收标准 criteria-1（vibe-coding/lesson1/zed-connection）"),
+        "{out}"
+    );
 
-    let out = commands::class::run(&api, commands::class::ClassCmd::List).unwrap();
-    assert!(out.contains("浙理班级"), "{out}");
+    let out = commands::criterion::run(&api, commands::criterion::CriterionCmd::List).unwrap();
+    assert!(out.contains("vibe-coding/lesson1/zed-connection"), "{out}");
+    assert!(out.contains("成功建立 Zed 连接"), "{out}");
 
-    let out = commands::class::run(
+    let out = commands::criterion::run(
         &api,
-        commands::class::ClassCmd::Get { id: "classes-1".into() },
+        commands::criterion::CriterionCmd::Get {
+            id: "criteria-1".into(),
+        },
     )
     .unwrap();
-    assert!(out.contains("大数据微专业"), "{out}");
-    assert!(out.contains("2026-09-01"), "{out}");
+    assert!(out.contains("vibe-coding/lesson1/zed-connection"), "{out}");
+    assert!(out.contains("成功建立 Zed 连接"), "{out}");
 }
 
 #[test]
-fn enrollment_enroll_withdraw() {
+fn completion_flow() {
     let api = client();
-    let out = commands::enrollment::run(
+    let out = commands::completion::run(
         &api,
-        commands::enrollment::EnrollmentCmd::Enroll {
-            class_id: "classes-1".into(),
-            student_id: "students-1".into(),
+        commands::completion::CompletionCmd::Create {
+            learner_id: "learners-1".into(),
+            criterion_id: "criteria-1".into(),
+            status: Some("not_completed".into()),
         },
     )
     .unwrap();
-    assert!(out.contains("已报名"), "{out}");
+    assert!(
+        out.contains("已创建完成记录 completions-1（learners-1 → criteria-1，not_completed）"),
+        "{out}"
+    );
 
-    // 重复报名幂等
-    let out = commands::enrollment::run(
+    // 标记完成（局部更新 status → completed）
+    let out = commands::completion::run(
         &api,
-        commands::enrollment::EnrollmentCmd::Enroll {
-            class_id: "classes-1".into(),
-            student_id: "students-1".into(),
+        commands::completion::CompletionCmd::Complete {
+            id: "completions-1".into(),
         },
     )
     .unwrap();
-    assert!(out.contains("无需重复报名"), "{out}");
+    assert!(
+        out.contains("已完成 completions-1（learners-1 → criteria-1）"),
+        "{out}"
+    );
 
-    let out = commands::enrollment::run(
-        &api,
-        commands::enrollment::EnrollmentCmd::List {
-            student_id: Some("students-1".into()),
-        },
-    )
-    .unwrap();
-    assert!(out.contains("classes-1"), "{out}");
+    let out = commands::completion::run(&api, commands::completion::CompletionCmd::List).unwrap();
+    assert!(out.contains("completions-1"), "{out}");
+    assert!(out.contains("completed"), "{out}");
 
-    let out = commands::enrollment::run(
+    let out = commands::completion::run(
         &api,
-        commands::enrollment::EnrollmentCmd::Withdraw {
-            class_id: "classes-1".into(),
-            student_id: "students-1".into(),
+        commands::completion::CompletionCmd::Get {
+            id: "completions-1".into(),
         },
     )
     .unwrap();
-    assert!(out.contains("已退课"), "{out}");
-
-    let out = commands::enrollment::run(
-        &api,
-        commands::enrollment::EnrollmentCmd::List {
-            student_id: Some("students-1".into()),
-        },
-    )
-    .unwrap();
-    assert!(out.contains("withdrawn"), "{out}");
-}
-
-#[test]
-fn progress_report_get() {
-    let api = client();
-    let out = commands::progress::run(
-        &api,
-        commands::progress::ProgressCmd::Report {
-            class_id: "classes-1".into(),
-            student_id: "students-1".into(),
-            percent: 0.5,
-            finished: true,
-        },
-    )
-    .unwrap();
-    assert!(out.contains("已上报进度 progress-1：50%（已完成）"), "{out}");
-
-    // 二次上报走更新
-    let out = commands::progress::run(
-        &api,
-        commands::progress::ProgressCmd::Report {
-            class_id: "classes-1".into(),
-            student_id: "students-1".into(),
-            percent: 0.8,
-            finished: false,
-        },
-    )
-    .unwrap();
-    assert!(out.contains("已更新进度 progress-1：80%"), "{out}");
-
-    let out = commands::progress::run(
-        &api,
-        commands::progress::ProgressCmd::Get {
-            class_id: "classes-1".into(),
-            student_id: "students-1".into(),
-        },
-    )
-    .unwrap();
-    assert!(out.contains("进度 progress-1：80%"), "{out}");
-}
-
-#[test]
-fn assessment_flow() {
-    let api = client();
-    let out = commands::assessment::run(
-        &api,
-        commands::assessment::AssessmentCmd::Create {
-            class_id: "classes-1".into(),
-            title: "期中考试".into(),
-            kind: "exam".into(),
-            full_score: 100,
-            pass_score: 60,
-            deadline: Some("2026-10-01".into()),
-        },
-    )
-    .unwrap();
-    assert!(out.contains("已创建考核 assessments-1（期中考试，100分）"), "{out}");
-
-    let out = commands::assessment::run(
-        &api,
-        commands::assessment::AssessmentCmd::Submit {
-            assessment_id: "assessments-1".into(),
-            student_id: "students-1".into(),
-        },
-    )
-    .unwrap();
-    assert!(out.contains("已提交 submissions-1（考核 assessments-1）"), "{out}");
-
-    let out = commands::assessment::run(
-        &api,
-        commands::assessment::AssessmentCmd::Grade {
-            submission_id: "submissions-1".into(),
-            score: 85.0,
-            comment: Some("不错".into()),
-        },
-    )
-    .unwrap();
-    assert!(out.contains("已评分 submissions-1：85 分（不错）"), "{out}");
-
-    let out = commands::assessment::run(
-        &api,
-        commands::assessment::AssessmentCmd::Stats {
-            class_id: Some("classes-1".into()),
-        },
-    )
-    .unwrap();
-    assert!(out.contains("期中考试"), "{out}");
-    assert!(out.contains("85.0"), "{out}");
+    assert!(out.contains("状态: completed"), "{out}");
 }
 
 #[test]

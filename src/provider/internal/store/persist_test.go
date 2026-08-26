@@ -10,45 +10,38 @@ import (
 	"github.com/quanttide/qtcloud-learn-provider/internal/domain"
 )
 
-func TestApplicationPersistence(t *testing.T) {
+func TestCompletionPersistence(t *testing.T) {
 	dir := t.TempDir()
 
-	s1 := NewApplicationStore()
+	s1 := NewCompletionStore()
 	s1.BaseStore.SetPersister(NewFilePersister(dir))
-	created := s1.Create(&domain.Application{
-		ProjectName: "持久化项目",
-		Opportunity: "机会",
-		TeamMode:    "personal",
-		TeamLeader:  "张三",
-		StudentName: "张三",
-		Status:      "已提交",
-	})
+	created := s1.Create(&domain.Completion{LearnerID: "lea-1", CriterionID: "cri-1", Status: "completed"})
 	if created.ID == "" {
 		t.Fatal("create failed")
 	}
 
 	// 新实例模拟重启：Load 后数据仍在
-	s2 := NewApplicationStore()
+	s2 := NewCompletionStore()
 	s2.BaseStore.SetPersister(NewFilePersister(dir))
-	if err := s2.BaseStore.Load("appl.json"); err != nil {
+	if err := s2.BaseStore.Load("com.json"); err != nil {
 		t.Fatalf("load: %v", err)
 	}
 	got, ok := s2.Get(created.ID)
 	if !ok {
-		t.Fatalf("restored app %s not found", created.ID)
+		t.Fatalf("restored completion %s not found", created.ID)
 	}
-	if got.ProjectName != "持久化项目" || got.TeamLeader != "张三" {
+	if got.LearnerID != "lea-1" || got.CriterionID != "cri-1" || got.Status != "completed" {
 		t.Errorf("restored = %+v", got)
 	}
 
 	// 序号恢复：新创建的 ID 不与旧记录冲突
-	next := s2.Create(&domain.Application{ProjectName: "第二个", TeamMode: "personal", TeamLeader: "李四"})
+	next := s2.Create(&domain.Completion{LearnerID: "lea-1", CriterionID: "cri-2"})
 	if next.ID == created.ID {
 		t.Errorf("seq not restored: %s == %s", next.ID, created.ID)
 	}
 
 	// 文件不存在时 Load 静默跳过（首启）
-	s3 := NewApplicationStore()
+	s3 := NewCompletionStore()
 	s3.BaseStore.SetPersister(NewFilePersister(dir))
 	if err := s3.BaseStore.Load("missing.json"); err != nil {
 		t.Errorf("missing file should be no-op, got %v", err)
@@ -57,10 +50,10 @@ func TestApplicationPersistence(t *testing.T) {
 
 func TestPersistFileWritten(t *testing.T) {
 	dir := t.TempDir()
-	s := NewProgressStore()
+	s := NewCriterionStore()
 	s.BaseStore.SetPersister(NewFilePersister(dir))
-	s.Create(&domain.Progress{StudentID: "stu-1", Percent: 0.5, Finished: false})
-	path := filepath.Join(dir, "prog.json")
+	s.Create(&domain.Criterion{Title: "vibe-coding/lesson1/zed-connection", Description: "成功建立 Zed 连接"})
+	path := filepath.Join(dir, "cri.json")
 	if _, err := os.Stat(path); err != nil {
 		t.Fatalf("persist file not written: %v", err)
 	}

@@ -2,7 +2,7 @@ use clap::{Parser, Subcommand};
 
 use qtcloud_learn_cli::{api, commands};
 
-/// 量潮学习云 CLI（学员侧）
+/// 量潮学习云 CLI（对齐《量潮学习管理标准》：Learner × Criterion → Completion）
 #[derive(Parser)]
 #[command(name = "qtcloud-learn", version, about)]
 struct Cli {
@@ -18,30 +18,20 @@ struct Cli {
 enum Commands {
     /// 打印版本信息
     Version,
-    /// 学员管理
-    Student {
+    /// 学习者管理
+    Learner {
         #[command(subcommand)]
-        cmd: commands::student::StudentCmd,
+        cmd: commands::learner::LearnerCmd,
     },
-    /// 班级管理
-    Class {
+    /// 验收标准管理
+    Criterion {
         #[command(subcommand)]
-        cmd: commands::class::ClassCmd,
+        cmd: commands::criterion::CriterionCmd,
     },
-    /// 选课 / 报名
-    Enrollment {
+    /// 完成记录管理
+    Completion {
         #[command(subcommand)]
-        cmd: commands::enrollment::EnrollmentCmd,
-    },
-    /// 学习进度
-    Progress {
-        #[command(subcommand)]
-        cmd: commands::progress::ProgressCmd,
-    },
-    /// 考核管理
-    Assessment {
-        #[command(subcommand)]
-        cmd: commands::assessment::AssessmentCmd,
+        cmd: commands::completion::CompletionCmd,
     },
 }
 
@@ -50,15 +40,10 @@ fn main() {
     let api = api::ApiClient::new(&cli.base_url);
 
     let output = match cli.command {
-        Commands::Version => Ok(format!(
-            "qtcloud-learn {}",
-            env!("CARGO_PKG_VERSION")
-        )),
-        Commands::Student { cmd } => commands::student::run(&api, cmd),
-        Commands::Class { cmd } => commands::class::run(&api, cmd),
-        Commands::Enrollment { cmd } => commands::enrollment::run(&api, cmd),
-        Commands::Progress { cmd } => commands::progress::run(&api, cmd),
-        Commands::Assessment { cmd } => commands::assessment::run(&api, cmd),
+        Commands::Version => Ok(format!("qtcloud-learn {}", env!("CARGO_PKG_VERSION"))),
+        Commands::Learner { cmd } => commands::learner::run(&api, cmd),
+        Commands::Criterion { cmd } => commands::criterion::run(&api, cmd),
+        Commands::Completion { cmd } => commands::completion::run(&api, cmd),
     };
 
     match output {
