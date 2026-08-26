@@ -58,3 +58,28 @@ func TestPersistFileWritten(t *testing.T) {
 		t.Fatalf("persist file not written: %v", err)
 	}
 }
+
+func TestDeletePersisted(t *testing.T) {
+	dir := t.TempDir()
+
+	s1 := NewCriterionStore()
+	s1.BaseStore.SetPersister(NewFilePersister(dir))
+	created := s1.Create(&domain.Criterion{Title: "vibe-coding/lesson1/zed-connection", Description: "成功建立 Zed 连接"})
+	if !s1.Delete(created.ID) {
+		t.Fatal("delete failed")
+	}
+
+	// 新实例模拟重启：删除结果已落盘，记录不应复活
+	s2 := NewCriterionStore()
+	s2.BaseStore.SetPersister(NewFilePersister(dir))
+	if err := s2.BaseStore.Load("cri.json"); err != nil {
+		t.Fatalf("load: %v", err)
+	}
+	if _, ok := s2.Get(created.ID); ok {
+		t.Fatal("deleted record resurrected after restart")
+	}
+	// 删除不存在的记录返回 false 且不应影响快照
+	if s2.Delete("x") {
+		t.Fatal("delete nonexistent ok = true")
+	}
+}

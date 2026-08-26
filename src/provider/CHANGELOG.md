@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [Unreleased]
+
+### Fixed
+
+- `DELETE` 操作落盘（`BaseStore.Delete` 调用 `persist()`），重启后已删除记录不再复活
+
 ## [0.1.0-alpha.3] - 2026-08-26
 
 ### Added

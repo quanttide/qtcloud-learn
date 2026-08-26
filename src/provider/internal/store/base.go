@@ -111,13 +111,14 @@ func (s *BaseStore[T]) Get(id string) (*T, bool) {
 	return v, ok
 }
 
-// Delete 按 ID 删除实体。
+// Delete 按 ID 删除实体（写后落盘，重启后不复活）。
 func (s *BaseStore[T]) Delete(id string) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	_, ok := s.data[id]
 	if ok {
 		delete(s.data, id)
+		s.persist()
 	}
 	return ok
 }
