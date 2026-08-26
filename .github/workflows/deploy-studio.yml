@@ -10,7 +10,7 @@ on:
       - 'studio/**'
 
 concurrency:
-  group: deploy-learn-admin
+  group: deploy-learn-studio
   cancel-in-progress: false
 
 env:
@@ -20,7 +20,7 @@ env:
 
 jobs:
   build-and-deploy:
-    name: Build Admin Web & Deploy to OSS
+    name: Build Web & Deploy to OSS
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
