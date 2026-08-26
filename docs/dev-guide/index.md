@@ -22,4 +22,5 @@ src/
 ## 相关文档
 
 - [ROADMAP.md](../../ROADMAP.md) — 产品路线图
+- [learning-profile.md](learning-profile.md) — 学习管理档案设计
 - `src/*/ROADMAP.md` — 各 scope 详细路线图
