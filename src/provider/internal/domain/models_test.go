@@ -23,16 +23,6 @@ func TestLearner_UserIDOptional(t *testing.T) {
 	}
 }
 
-func TestCriterion_JSON(t *testing.T) {
-	c := Criterion{ID: "cri-1", Title: "会连接 Zed", Description: "成功建立 Zed 连接"}
-	b, _ := json.Marshal(c)
-	var got Criterion
-	json.Unmarshal(b, &got)
-	if got.ID != "cri-1" || got.Title != "会连接 Zed" || got.Description != "成功建立 Zed 连接" {
-		t.Fatalf("roundtrip = %+v", got)
-	}
-}
-
 func TestCompletion_JSON(t *testing.T) {
 	c := Completion{
 		ID: "com-1", LearnerID: "lea-1", CriterionID: "cri-1",

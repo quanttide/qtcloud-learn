@@ -10,8 +10,8 @@ import (
 
 // newRouter 创建并配置所有路由，可单独测试。
 // API 无版本前缀（资源直挂根路径），对齐《量潮学习管理标准》（docs/specification）：
-// Learner × Criterion → Completion。
-// 持久化（Learner / Criterion / Completion 三个实体）：
+// Learner × criterion_id（→ 课程域 Criterion.id）→ Completion。
+// 持久化（Learner / Completion 两个实体）：
 //   - OSS_BUCKET 非空 → OSS 对象存储（生产 FC：实例盘不持久，跨实例/发版不丢）
 //   - 否则 DATA_DIR 非空 → 本地 JSON 文件（dev/测试）
 //   - 都为空 → 纯内存（测试默认）
@@ -34,20 +34,16 @@ func newRouter() *http.ServeMux {
 	}
 
 	learnerStore := store.NewLearnerStore()
-	criterionStore := store.NewCriterionStore()
 	completionStore := store.NewCompletionStore()
 
 	if persister != nil {
 		learnerStore.BaseStore.SetPersister(persister)
 		_ = learnerStore.BaseStore.Load("lea.json")
-		criterionStore.BaseStore.SetPersister(persister)
-		_ = criterionStore.BaseStore.Load("cri.json")
 		completionStore.BaseStore.SetPersister(persister)
 		_ = completionStore.BaseStore.Load("com.json")
 	}
 
 	learnerh := handler.NewLearnerHandler(learnerStore)
-	crith := handler.NewCriterionHandler(criterionStore)
 	comh := handler.NewCompletionHandler(completionStore)
 
 	mux := http.NewServeMux()
@@ -58,13 +54,6 @@ func newRouter() *http.ServeMux {
 	mux.HandleFunc("GET /learners/{id}", learnerh.Get)
 	mux.HandleFunc("PUT /learners/{id}", learnerh.Update)
 	mux.HandleFunc("DELETE /learners/{id}", learnerh.Delete)
-
-	// Criterion（验收标准）
-	mux.HandleFunc("GET /criteria", crith.List)
-	mux.HandleFunc("POST /criteria", crith.Create)
-	mux.HandleFunc("GET /criteria/{id}", crith.Get)
-	mux.HandleFunc("PUT /criteria/{id}", crith.Update)
-	mux.HandleFunc("DELETE /criteria/{id}", crith.Delete)
 
 	// Completion（完成记录）
 	mux.HandleFunc("GET /completions", comh.List)

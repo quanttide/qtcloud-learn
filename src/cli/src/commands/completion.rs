@@ -12,7 +12,7 @@ pub enum CompletionCmd {
         /// 学习者 ID
         #[arg(long)]
         learner_id: String,
-        /// 验收标准 ID
+        /// 验收标准 ID（课程域 Criterion.id）
         #[arg(long)]
         criterion_id: String,
         /// 通过状态：completed / not_completed（缺省 not_completed）

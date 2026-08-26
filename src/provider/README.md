@@ -2,7 +2,7 @@
 
 量潮学习云的服务端。Go 编写。
 
-领域模型对齐《量潮学习管理标准》（`docs/specification`）：核心模型 **Learner × Criterion → Completion**。
+领域模型对齐《量潮学习管理标准》（`docs/specification`）：核心模型 **Learner × Lesson → Completion**。
 
 ## 开发
 
@@ -18,7 +18,7 @@ go run ./cmd/server
 
 ```
 cmd/server/          # 服务入口与路由（资源 CRUD 与 /healthz）
-internal/domain/     # 领域模型（Learner / Criterion / Completion）
+internal/domain/     # 领域模型（Learner / Completion）
 internal/store/      # 内存存储（BaseStore + 各实体 Store）
 internal/handler/    # CRUD handler（泛型 CRUDHandler + 各实体 Handler）
 internal/version/    # 版本信息

@@ -14,11 +14,9 @@ import (
 // setupMux 创建注册了全部资源路由的 mux，用于 handler 测试。
 func setupMux() *http.ServeMux {
 	learnerStore := store.NewLearnerStore()
-	criterionStore := store.NewCriterionStore()
 	completionStore := store.NewCompletionStore()
 
 	learnerh := NewLearnerHandler(learnerStore)
-	crith := NewCriterionHandler(criterionStore)
 	comh := NewCompletionHandler(completionStore)
 
 	mux := http.NewServeMux()
@@ -27,11 +25,6 @@ func setupMux() *http.ServeMux {
 	mux.HandleFunc("GET /learners/{id}", learnerh.Get)
 	mux.HandleFunc("PUT /learners/{id}", learnerh.Update)
 	mux.HandleFunc("DELETE /learners/{id}", learnerh.Delete)
-	mux.HandleFunc("GET /criteria", crith.List)
-	mux.HandleFunc("POST /criteria", crith.Create)
-	mux.HandleFunc("GET /criteria/{id}", crith.Get)
-	mux.HandleFunc("PUT /criteria/{id}", crith.Update)
-	mux.HandleFunc("DELETE /criteria/{id}", crith.Delete)
 	mux.HandleFunc("GET /completions", comh.List)
 	mux.HandleFunc("POST /completions", comh.Create)
 	mux.HandleFunc("GET /completions/{id}", comh.Get)
@@ -115,54 +108,6 @@ func TestLearnerHandler_CRUD(t *testing.T) {
 	w = request(t, mux, "DELETE", fmt.Sprintf("/learners/%s", lid), "")
 	assertStatus(t, w, 204)
 	w = request(t, mux, "DELETE", "/learners/nonexistent", "")
-	assertStatus(t, w, 404)
-}
-
-// --- Criterion ---
-
-func TestCriterionHandler_CRUD(t *testing.T) {
-	mux := setupMux()
-
-	w := request(t, mux, "GET", "/criteria", "")
-	assertStatus(t, w, 200)
-	assertJSONArray(t, w)
-
-	w = request(t, mux, "POST", "/criteria", `{"title":"会连接 Zed","description":"成功建立 Zed 连接"}`)
-	assertStatus(t, w, 201)
-	c := assertJSON(t, w)
-	cid := c["id"].(string)
-	if c["title"] != "会连接 Zed" || c["description"] != "成功建立 Zed 连接" {
-		t.Fatalf("Create = %v", c)
-	}
-
-	w = request(t, mux, "POST", "/criteria", `{invalid`)
-	assertStatus(t, w, 400)
-
-	w = request(t, mux, "POST", "/criteria", `{"description":"缺 title"}`)
-	assertStatus(t, w, 400)
-
-	w = request(t, mux, "POST", "/criteria", `{"title":"缺 description"}`)
-	assertStatus(t, w, 400)
-
-	w = request(t, mux, "GET", fmt.Sprintf("/criteria/%s", cid), "")
-	assertStatus(t, w, 200)
-
-	w = request(t, mux, "GET", "/criteria/nonexistent", "")
-	assertStatus(t, w, 404)
-
-	w = request(t, mux, "PUT", fmt.Sprintf("/criteria/%s", cid), `{"title":"会用 Agent 执行任务","description":"完成 Agent 任务"}`)
-	assertStatus(t, w, 200)
-	c = assertJSON(t, w)
-	if c["title"] != "会用 Agent 执行任务" || c["description"] != "完成 Agent 任务" {
-		t.Fatalf("Update = %v", c)
-	}
-
-	w = request(t, mux, "PUT", "/criteria/nonexistent", `{"title":"x","description":"x"}`)
-	assertStatus(t, w, 404)
-
-	w = request(t, mux, "DELETE", fmt.Sprintf("/criteria/%s", cid), "")
-	assertStatus(t, w, 204)
-	w = request(t, mux, "DELETE", "/criteria/nonexistent", "")
 	assertStatus(t, w, 404)
 }
 

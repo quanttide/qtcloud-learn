@@ -179,50 +179,19 @@ fn learner_crud() {
 }
 
 #[test]
-fn criterion_crud() {
-    let api = client();
-    let out = commands::criterion::run(
-        &api,
-        commands::criterion::CriterionCmd::Create {
-            title: "vibe-coding/lesson1/zed-connection".into(),
-            description: "成功建立 Zed 连接".into(),
-        },
-    )
-    .unwrap();
-    assert!(
-        out.contains("已创建验收标准 criteria-1（vibe-coding/lesson1/zed-connection）"),
-        "{out}"
-    );
-
-    let out = commands::criterion::run(&api, commands::criterion::CriterionCmd::List).unwrap();
-    assert!(out.contains("vibe-coding/lesson1/zed-connection"), "{out}");
-    assert!(out.contains("成功建立 Zed 连接"), "{out}");
-
-    let out = commands::criterion::run(
-        &api,
-        commands::criterion::CriterionCmd::Get {
-            id: "criteria-1".into(),
-        },
-    )
-    .unwrap();
-    assert!(out.contains("vibe-coding/lesson1/zed-connection"), "{out}");
-    assert!(out.contains("成功建立 Zed 连接"), "{out}");
-}
-
-#[test]
 fn completion_flow() {
     let api = client();
     let out = commands::completion::run(
         &api,
         commands::completion::CompletionCmd::Create {
             learner_id: "learners-1".into(),
-            criterion_id: "criteria-1".into(),
+            criterion_id: "cri-1".into(),
             status: Some("not_completed".into()),
         },
     )
     .unwrap();
     assert!(
-        out.contains("已创建完成记录 completions-1（learners-1 → criteria-1，not_completed）"),
+        out.contains("已创建完成记录 completions-1（learners-1 → cri-1，not_completed）"),
         "{out}"
     );
 
@@ -235,7 +204,7 @@ fn completion_flow() {
     )
     .unwrap();
     assert!(
-        out.contains("已完成 completions-1（learners-1 → criteria-1）"),
+        out.contains("已完成 completions-1（learners-1 → cri-1）"),
         "{out}"
     );
 

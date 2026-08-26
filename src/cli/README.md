@@ -2,7 +2,7 @@
 
 量潮学习云的 CLI 工具。Rust 编写。
 
-领域模型对齐《量潮学习管理标准》（`docs/specification`）：核心模型 **Learner × Criterion → Completion**。
+领域模型对齐《量潮学习管理标准》（`docs/specification`）：核心模型 **Learner × Lesson → Completion**。
 
 ## 开发
 
@@ -22,7 +22,6 @@ cargo test
 | 子命令 | 操作 |
 |--------|------|
 | `learner` | create / list / get |
-| `criterion` | create / list / get |
 | `completion` | create / complete（标记完成）/ list / get |
 
 连接的是 `qtcloud-learn-provider`（资源直挂根路径）。

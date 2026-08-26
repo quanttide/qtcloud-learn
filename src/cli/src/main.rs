@@ -2,7 +2,7 @@ use clap::{Parser, Subcommand};
 
 use qtcloud_learn_cli::{api, commands};
 
-/// 量潮学习云 CLI（对齐《量潮学习管理标准》：Learner × Criterion → Completion）
+/// 量潮学习云 CLI（对齐《量潮学习管理标准》：Learner × Lesson → Completion）
 #[derive(Parser)]
 #[command(name = "qtcloud-learn", version, about)]
 struct Cli {
@@ -23,11 +23,6 @@ enum Commands {
         #[command(subcommand)]
         cmd: commands::learner::LearnerCmd,
     },
-    /// 验收标准管理
-    Criterion {
-        #[command(subcommand)]
-        cmd: commands::criterion::CriterionCmd,
-    },
     /// 完成记录管理
     Completion {
         #[command(subcommand)]
@@ -42,7 +37,6 @@ fn main() {
     let output = match cli.command {
         Commands::Version => Ok(format!("qtcloud-learn {}", env!("CARGO_PKG_VERSION"))),
         Commands::Learner { cmd } => commands::learner::run(&api, cmd),
-        Commands::Criterion { cmd } => commands::criterion::run(&api, cmd),
         Commands::Completion { cmd } => commands::completion::run(&api, cmd),
     };
 

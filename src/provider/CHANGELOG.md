@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [Unreleased]
+
+### Removed / Changed
+
+- **破坏性**：移除 Criterion 本地模型与 `/criteria` 接口——验收标准的定义面在课程云，学习云不再注册副本；`completion.criterion_id` 字段名保留，改为直指课程域 Criterion.id（同源直连）
+
 ## [0.1.0-alpha.4] - 2026-08-26
 
 ### Fixed
