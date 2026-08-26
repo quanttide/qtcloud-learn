@@ -1,5 +1,5 @@
-# 部署 LMS 后台：推送 admin/* tag 时构建（--target=lib/main_admin.dart）上传 OSS 并刷 CDN。
-# 架构：admin/* tag → Actions → OSS 桶（qtcloud-learn-admin，静态网站）→ CDN（learn.cloud.quanttide.com）
+# 部署 LMS 后台：推送 studio/* tag 时构建（--target=lib/main_admin.dart）上传 OSS 并刷 CDN。
+# 架构：studio/* tag → Actions → OSS 桶（qtcloud-learn-admin，静态网站）→ CDN（learn.cloud.quanttide.com）
 # 前台（qtclass 学员端）在 qtclass 仓库部署，前后台分离各一个 HTML。
 
 name: Deploy Admin
@@ -7,7 +7,7 @@ name: Deploy Admin
 on:
   push:
     tags:
-      - 'admin/**'
+      - 'studio/**'
 
 concurrency:
   group: deploy-learn-admin
