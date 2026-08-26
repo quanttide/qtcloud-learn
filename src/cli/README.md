@@ -25,7 +25,7 @@ cargo test
 | `criterion` | create / list / get |
 | `completion` | create / complete（标记完成）/ list / get |
 
-连接的是 `qtcloud-learn-provider`（`/api/v1`）。
+连接的是 `qtcloud-learn-provider`（资源直挂根路径）。
 
 ## 相关文档
 

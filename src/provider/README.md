@@ -17,7 +17,7 @@ go run ./cmd/server
 ## 目录
 
 ```
-cmd/server/          # 服务入口与路由（/api/v1/*，/healthz）
+cmd/server/          # 服务入口与路由（资源 CRUD 与 /healthz）
 internal/domain/     # 领域模型（Learner / Criterion / Completion）
 internal/store/      # 内存存储（BaseStore + 各实体 Store）
 internal/handler/    # CRUD handler（泛型 CRUDHandler + 各实体 Handler）
@@ -26,13 +26,13 @@ internal/version/    # 版本信息
 
 ## API
 
-LMS API 统一挂在 `/api/v1/` 前缀下，每个资源提供标准 CRUD：
+API 无版本前缀，每个资源在根路径提供标准 CRUD：
 
 | 资源 | 路径 |
 |------|------|
-| 学习者 | `/api/v1/learners` |
-| 验收标准 | `/api/v1/criteria` |
-| 完成记录 | `/api/v1/completions` |
+| 学习者 | `/learners` |
+| 验收标准 | `/criteria` |
+| 完成记录 | `/completions` |
 
 健康检查：`GET /healthz`。
 

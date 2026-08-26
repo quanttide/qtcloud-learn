@@ -1,4 +1,4 @@
-//! Provider API 客户端（`/api/v1` 前缀）。
+//! Provider API 客户端。
 
 use serde_json::Value;
 
@@ -26,13 +26,8 @@ impl ApiClient {
         self.request("PUT", resource, Some(body))
     }
 
-    fn request(
-        &self,
-        method: &str,
-        resource: &str,
-        body: Option<&Value>,
-    ) -> Result<Value, String> {
-        let url = format!("{}/api/v1/{}", self.base_url, resource);
+    fn request(&self, method: &str, resource: &str, body: Option<&Value>) -> Result<Value, String> {
+        let url = format!("{}/{}", self.base_url, resource);
         let resp = match method {
             "GET" => ureq::get(&url).call(),
             "POST" => ureq::post(&url).send_json(body.unwrap_or(&Value::Null)),

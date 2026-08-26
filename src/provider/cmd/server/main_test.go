@@ -30,9 +30,9 @@ func TestRouter_SpecRoutes(t *testing.T) {
 		path string
 		body string
 	}{
-		{"learners", "/api/v1/learners", `{"user_id":"user-123"}`},
-		{"criteria", "/api/v1/criteria", `{"title":"vibe-coding/lesson1/zed-connection","description":"成功建立 Zed 连接"}`},
-		{"completions", "/api/v1/completions", `{"learner_id":"lea-1","criterion_id":"cri-1"}`},
+		{"learners", "/learners", `{"user_id":"user-123"}`},
+		{"criteria", "/criteria", `{"title":"vibe-coding/lesson1/zed-connection","description":"成功建立 Zed 连接"}`},
+		{"completions", "/completions", `{"learner_id":"lea-1","criterion_id":"cri-1"}`},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

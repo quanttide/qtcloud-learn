@@ -9,7 +9,7 @@ import (
 )
 
 // newRouter 创建并配置所有路由，可单独测试。
-// API 统一挂在 /api/v1 前缀下，资源对齐《量潮学习管理标准》（docs/specification）：
+// API 无版本前缀（资源直挂根路径），对齐《量潮学习管理标准》（docs/specification）：
 // Learner × Criterion → Completion。
 // 持久化（Learner / Criterion / Completion 三个实体）：
 //   - OSS_BUCKET 非空 → OSS 对象存储（生产 FC：实例盘不持久，跨实例/发版不丢）
@@ -53,25 +53,25 @@ func newRouter() *http.ServeMux {
 	mux := http.NewServeMux()
 
 	// Learner（学习者）
-	mux.HandleFunc("GET /api/v1/learners", learnerh.List)
-	mux.HandleFunc("POST /api/v1/learners", learnerh.Create)
-	mux.HandleFunc("GET /api/v1/learners/{id}", learnerh.Get)
-	mux.HandleFunc("PUT /api/v1/learners/{id}", learnerh.Update)
-	mux.HandleFunc("DELETE /api/v1/learners/{id}", learnerh.Delete)
+	mux.HandleFunc("GET /learners", learnerh.List)
+	mux.HandleFunc("POST /learners", learnerh.Create)
+	mux.HandleFunc("GET /learners/{id}", learnerh.Get)
+	mux.HandleFunc("PUT /learners/{id}", learnerh.Update)
+	mux.HandleFunc("DELETE /learners/{id}", learnerh.Delete)
 
 	// Criterion（验收标准）
-	mux.HandleFunc("GET /api/v1/criteria", crith.List)
-	mux.HandleFunc("POST /api/v1/criteria", crith.Create)
-	mux.HandleFunc("GET /api/v1/criteria/{id}", crith.Get)
-	mux.HandleFunc("PUT /api/v1/criteria/{id}", crith.Update)
-	mux.HandleFunc("DELETE /api/v1/criteria/{id}", crith.Delete)
+	mux.HandleFunc("GET /criteria", crith.List)
+	mux.HandleFunc("POST /criteria", crith.Create)
+	mux.HandleFunc("GET /criteria/{id}", crith.Get)
+	mux.HandleFunc("PUT /criteria/{id}", crith.Update)
+	mux.HandleFunc("DELETE /criteria/{id}", crith.Delete)
 
 	// Completion（完成记录）
-	mux.HandleFunc("GET /api/v1/completions", comh.List)
-	mux.HandleFunc("POST /api/v1/completions", comh.Create)
-	mux.HandleFunc("GET /api/v1/completions/{id}", comh.Get)
-	mux.HandleFunc("PUT /api/v1/completions/{id}", comh.Update)
-	mux.HandleFunc("DELETE /api/v1/completions/{id}", comh.Delete)
+	mux.HandleFunc("GET /completions", comh.List)
+	mux.HandleFunc("POST /completions", comh.Create)
+	mux.HandleFunc("GET /completions/{id}", comh.Get)
+	mux.HandleFunc("PUT /completions/{id}", comh.Update)
+	mux.HandleFunc("DELETE /completions/{id}", comh.Delete)
 
 	// Health
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {

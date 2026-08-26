@@ -11,7 +11,7 @@ import (
 	"github.com/quanttide/qtcloud-learn-provider/internal/store"
 )
 
-// setupMux 创建注册了全部 /api/v1 路由的 mux，用于 handler 测试。
+// setupMux 创建注册了全部资源路由的 mux，用于 handler 测试。
 func setupMux() *http.ServeMux {
 	learnerStore := store.NewLearnerStore()
 	criterionStore := store.NewCriterionStore()
@@ -22,21 +22,21 @@ func setupMux() *http.ServeMux {
 	comh := NewCompletionHandler(completionStore)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /api/v1/learners", learnerh.List)
-	mux.HandleFunc("POST /api/v1/learners", learnerh.Create)
-	mux.HandleFunc("GET /api/v1/learners/{id}", learnerh.Get)
-	mux.HandleFunc("PUT /api/v1/learners/{id}", learnerh.Update)
-	mux.HandleFunc("DELETE /api/v1/learners/{id}", learnerh.Delete)
-	mux.HandleFunc("GET /api/v1/criteria", crith.List)
-	mux.HandleFunc("POST /api/v1/criteria", crith.Create)
-	mux.HandleFunc("GET /api/v1/criteria/{id}", crith.Get)
-	mux.HandleFunc("PUT /api/v1/criteria/{id}", crith.Update)
-	mux.HandleFunc("DELETE /api/v1/criteria/{id}", crith.Delete)
-	mux.HandleFunc("GET /api/v1/completions", comh.List)
-	mux.HandleFunc("POST /api/v1/completions", comh.Create)
-	mux.HandleFunc("GET /api/v1/completions/{id}", comh.Get)
-	mux.HandleFunc("PUT /api/v1/completions/{id}", comh.Update)
-	mux.HandleFunc("DELETE /api/v1/completions/{id}", comh.Delete)
+	mux.HandleFunc("GET /learners", learnerh.List)
+	mux.HandleFunc("POST /learners", learnerh.Create)
+	mux.HandleFunc("GET /learners/{id}", learnerh.Get)
+	mux.HandleFunc("PUT /learners/{id}", learnerh.Update)
+	mux.HandleFunc("DELETE /learners/{id}", learnerh.Delete)
+	mux.HandleFunc("GET /criteria", crith.List)
+	mux.HandleFunc("POST /criteria", crith.Create)
+	mux.HandleFunc("GET /criteria/{id}", crith.Get)
+	mux.HandleFunc("PUT /criteria/{id}", crith.Update)
+	mux.HandleFunc("DELETE /criteria/{id}", crith.Delete)
+	mux.HandleFunc("GET /completions", comh.List)
+	mux.HandleFunc("POST /completions", comh.Create)
+	mux.HandleFunc("GET /completions/{id}", comh.Get)
+	mux.HandleFunc("PUT /completions/{id}", comh.Update)
+	mux.HandleFunc("DELETE /completions/{id}", comh.Delete)
 	return mux
 }
 
@@ -81,11 +81,11 @@ func assertJSONArray(t *testing.T, w *httptest.ResponseRecorder) []any {
 func TestLearnerHandler_CRUD(t *testing.T) {
 	mux := setupMux()
 
-	w := request(t, mux, "GET", "/api/v1/learners", "")
+	w := request(t, mux, "GET", "/learners", "")
 	assertStatus(t, w, 200)
 	assertJSONArray(t, w)
 
-	w = request(t, mux, "POST", "/api/v1/learners", `{"user_id":"user-123"}`)
+	w = request(t, mux, "POST", "/learners", `{"user_id":"user-123"}`)
 	assertStatus(t, w, 201)
 	l := assertJSON(t, w)
 	lid := l["id"].(string)
@@ -93,28 +93,28 @@ func TestLearnerHandler_CRUD(t *testing.T) {
 		t.Fatalf("Create = %v", l)
 	}
 
-	w = request(t, mux, "POST", "/api/v1/learners", `{invalid`)
+	w = request(t, mux, "POST", "/learners", `{invalid`)
 	assertStatus(t, w, 400)
 
-	w = request(t, mux, "GET", fmt.Sprintf("/api/v1/learners/%s", lid), "")
+	w = request(t, mux, "GET", fmt.Sprintf("/learners/%s", lid), "")
 	assertStatus(t, w, 200)
 
-	w = request(t, mux, "GET", "/api/v1/learners/nonexistent", "")
+	w = request(t, mux, "GET", "/learners/nonexistent", "")
 	assertStatus(t, w, 404)
 
-	w = request(t, mux, "PUT", fmt.Sprintf("/api/v1/learners/%s", lid), `{"user_id":"user-456"}`)
+	w = request(t, mux, "PUT", fmt.Sprintf("/learners/%s", lid), `{"user_id":"user-456"}`)
 	assertStatus(t, w, 200)
 	l = assertJSON(t, w)
 	if l["user_id"] != "user-456" {
 		t.Fatalf("Update = %v", l)
 	}
 
-	w = request(t, mux, "PUT", "/api/v1/learners/nonexistent", `{"user_id":"x"}`)
+	w = request(t, mux, "PUT", "/learners/nonexistent", `{"user_id":"x"}`)
 	assertStatus(t, w, 404)
 
-	w = request(t, mux, "DELETE", fmt.Sprintf("/api/v1/learners/%s", lid), "")
+	w = request(t, mux, "DELETE", fmt.Sprintf("/learners/%s", lid), "")
 	assertStatus(t, w, 204)
-	w = request(t, mux, "DELETE", "/api/v1/learners/nonexistent", "")
+	w = request(t, mux, "DELETE", "/learners/nonexistent", "")
 	assertStatus(t, w, 404)
 }
 
@@ -123,11 +123,11 @@ func TestLearnerHandler_CRUD(t *testing.T) {
 func TestCriterionHandler_CRUD(t *testing.T) {
 	mux := setupMux()
 
-	w := request(t, mux, "GET", "/api/v1/criteria", "")
+	w := request(t, mux, "GET", "/criteria", "")
 	assertStatus(t, w, 200)
 	assertJSONArray(t, w)
 
-	w = request(t, mux, "POST", "/api/v1/criteria", `{"title":"vibe-coding/lesson1/zed-connection","description":"成功建立 Zed 连接"}`)
+	w = request(t, mux, "POST", "/criteria", `{"title":"vibe-coding/lesson1/zed-connection","description":"成功建立 Zed 连接"}`)
 	assertStatus(t, w, 201)
 	c := assertJSON(t, w)
 	cid := c["id"].(string)
@@ -135,34 +135,34 @@ func TestCriterionHandler_CRUD(t *testing.T) {
 		t.Fatalf("Create = %v", c)
 	}
 
-	w = request(t, mux, "POST", "/api/v1/criteria", `{invalid`)
+	w = request(t, mux, "POST", "/criteria", `{invalid`)
 	assertStatus(t, w, 400)
 
-	w = request(t, mux, "POST", "/api/v1/criteria", `{"description":"缺 title"}`)
+	w = request(t, mux, "POST", "/criteria", `{"description":"缺 title"}`)
 	assertStatus(t, w, 400)
 
-	w = request(t, mux, "POST", "/api/v1/criteria", `{"title":"缺 description"}`)
+	w = request(t, mux, "POST", "/criteria", `{"title":"缺 description"}`)
 	assertStatus(t, w, 400)
 
-	w = request(t, mux, "GET", fmt.Sprintf("/api/v1/criteria/%s", cid), "")
+	w = request(t, mux, "GET", fmt.Sprintf("/criteria/%s", cid), "")
 	assertStatus(t, w, 200)
 
-	w = request(t, mux, "GET", "/api/v1/criteria/nonexistent", "")
+	w = request(t, mux, "GET", "/criteria/nonexistent", "")
 	assertStatus(t, w, 404)
 
-	w = request(t, mux, "PUT", fmt.Sprintf("/api/v1/criteria/%s", cid), `{"title":"vibe-coding/lesson2/agent","description":"完成 Agent 任务"}`)
+	w = request(t, mux, "PUT", fmt.Sprintf("/criteria/%s", cid), `{"title":"vibe-coding/lesson2/agent","description":"完成 Agent 任务"}`)
 	assertStatus(t, w, 200)
 	c = assertJSON(t, w)
 	if c["title"] != "vibe-coding/lesson2/agent" || c["description"] != "完成 Agent 任务" {
 		t.Fatalf("Update = %v", c)
 	}
 
-	w = request(t, mux, "PUT", "/api/v1/criteria/nonexistent", `{"title":"x","description":"x"}`)
+	w = request(t, mux, "PUT", "/criteria/nonexistent", `{"title":"x","description":"x"}`)
 	assertStatus(t, w, 404)
 
-	w = request(t, mux, "DELETE", fmt.Sprintf("/api/v1/criteria/%s", cid), "")
+	w = request(t, mux, "DELETE", fmt.Sprintf("/criteria/%s", cid), "")
 	assertStatus(t, w, 204)
-	w = request(t, mux, "DELETE", "/api/v1/criteria/nonexistent", "")
+	w = request(t, mux, "DELETE", "/criteria/nonexistent", "")
 	assertStatus(t, w, 404)
 }
 
@@ -171,11 +171,11 @@ func TestCriterionHandler_CRUD(t *testing.T) {
 func TestCompletionHandler_CRUD(t *testing.T) {
 	mux := setupMux()
 
-	w := request(t, mux, "GET", "/api/v1/completions", "")
+	w := request(t, mux, "GET", "/completions", "")
 	assertStatus(t, w, 200)
 	assertJSONArray(t, w)
 
-	w = request(t, mux, "POST", "/api/v1/completions", `{"learner_id":"lea-1","criterion_id":"cri-1"}`)
+	w = request(t, mux, "POST", "/completions", `{"learner_id":"lea-1","criterion_id":"cri-1"}`)
 	assertStatus(t, w, 201)
 	com := assertJSON(t, w)
 	cid := com["id"].(string)
@@ -190,25 +190,25 @@ func TestCompletionHandler_CRUD(t *testing.T) {
 		t.Fatalf("Create timestamps missing = %v", com)
 	}
 
-	w = request(t, mux, "POST", "/api/v1/completions", `{invalid`)
+	w = request(t, mux, "POST", "/completions", `{invalid`)
 	assertStatus(t, w, 400)
 
-	w = request(t, mux, "POST", "/api/v1/completions", `{"criterion_id":"cri-1"}`)
+	w = request(t, mux, "POST", "/completions", `{"criterion_id":"cri-1"}`)
 	assertStatus(t, w, 400)
 
-	w = request(t, mux, "POST", "/api/v1/completions", `{"learner_id":"lea-1"}`)
+	w = request(t, mux, "POST", "/completions", `{"learner_id":"lea-1"}`)
 	assertStatus(t, w, 400)
 
-	w = request(t, mux, "POST", "/api/v1/completions", `{"learner_id":"lea-1","criterion_id":"cri-1","status":"invalid"}`)
+	w = request(t, mux, "POST", "/completions", `{"learner_id":"lea-1","criterion_id":"cri-1","status":"invalid"}`)
 	assertStatus(t, w, 400)
 
-	w = request(t, mux, "GET", fmt.Sprintf("/api/v1/completions/%s", cid), "")
+	w = request(t, mux, "GET", fmt.Sprintf("/completions/%s", cid), "")
 	assertStatus(t, w, 200)
 
-	w = request(t, mux, "GET", "/api/v1/completions/nonexistent", "")
+	w = request(t, mux, "GET", "/completions/nonexistent", "")
 	assertStatus(t, w, 404)
 
-	w = request(t, mux, "PUT", fmt.Sprintf("/api/v1/completions/%s", cid), `{"learner_id":"lea-1","criterion_id":"cri-1","status":"completed"}`)
+	w = request(t, mux, "PUT", fmt.Sprintf("/completions/%s", cid), `{"learner_id":"lea-1","criterion_id":"cri-1","status":"completed"}`)
 	assertStatus(t, w, 200)
 	com = assertJSON(t, w)
 	if com["status"] != "completed" {
@@ -216,18 +216,18 @@ func TestCompletionHandler_CRUD(t *testing.T) {
 	}
 
 	// 局部更新（合并语义）：仅改 status 不抹掉 learner_id / criterion_id
-	w = request(t, mux, "PUT", fmt.Sprintf("/api/v1/completions/%s", cid), `{"status":"not_completed"}`)
+	w = request(t, mux, "PUT", fmt.Sprintf("/completions/%s", cid), `{"status":"not_completed"}`)
 	assertStatus(t, w, 200)
 	com = assertJSON(t, w)
 	if com["status"] != "not_completed" || com["learner_id"] != "lea-1" || com["criterion_id"] != "cri-1" {
 		t.Fatalf("Partial Update = %v", com)
 	}
 
-	w = request(t, mux, "PUT", "/api/v1/completions/nonexistent", `{"status":"completed"}`)
+	w = request(t, mux, "PUT", "/completions/nonexistent", `{"status":"completed"}`)
 	assertStatus(t, w, 404)
 
-	w = request(t, mux, "DELETE", fmt.Sprintf("/api/v1/completions/%s", cid), "")
+	w = request(t, mux, "DELETE", fmt.Sprintf("/completions/%s", cid), "")
 	assertStatus(t, w, 204)
-	w = request(t, mux, "DELETE", "/api/v1/completions/nonexistent", "")
+	w = request(t, mux, "DELETE", "/completions/nonexistent", "")
 	assertStatus(t, w, 404)
 }

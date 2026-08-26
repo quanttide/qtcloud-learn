@@ -79,7 +79,7 @@ fn spawn_server() -> String {
     format!("http://{addr}")
 }
 
-/// 极简 CRUD 路由（/api/v1/{resource}[/{id}]）。
+/// 极简 CRUD 路由（/{resource}[/{id}]）。
 fn handle(
     store: &Store,
     seq: &Arc<Mutex<HashMap<String, usize>>>,
@@ -87,7 +87,8 @@ fn handle(
     path: &str,
     body: &str,
 ) -> (u16, String) {
-    let path = path.trim_start_matches("/api/v1/");
+    // 无版本前缀，路径形如 /learners、/learners/{id}：去掉前导斜杠后按段解析
+    let path = path.trim_start_matches('/');
     let mut segs = path.split('/');
     let resource = segs.next().unwrap_or("").to_string();
     let id = segs.next();
