@@ -112,10 +112,12 @@ fn handle(
         ("POST", None) => {
             let mut v: serde_json::Value =
                 serde_json::from_str(body).unwrap_or(serde_json::json!({}));
-            let mut seq = seq.lock().unwrap();
-            let n = seq.entry(resource.clone()).or_insert(0);
-            *n += 1;
-            let new_id = format!("{resource}-{n}");
+            let new_id = v["id"].as_str().map(str::to_string).unwrap_or_else(|| {
+                let mut seq = seq.lock().unwrap();
+                let n = seq.entry(resource.clone()).or_insert(0);
+                *n += 1;
+                format!("{resource}-{n}")
+            });
             v["id"] = serde_json::json!(new_id);
             store.insert(format!("{resource}/{new_id}"), v.clone());
             (201, serde_json::to_string(&v).unwrap())
@@ -155,11 +157,14 @@ fn learner_crud() {
         &api,
         commands::learner::LearnerCmd::Create {
             user_id: Some("user-123".into()),
+            schedule_id: Some("schedule-agent-engineer".into()),
         },
     )
     .unwrap();
     assert!(
-        out.contains("已创建学习者 learners-1（user_id: user-123）"),
+        out.contains(
+            "已创建学习者 learners-1（user_id: user-123，schedule_id: schedule-agent-engineer）"
+        ),
         "{out}"
     );
 
@@ -176,6 +181,7 @@ fn learner_crud() {
     .unwrap();
     assert!(out.contains("learners-1"), "{out}");
     assert!(out.contains("user-123"), "{out}");
+    assert!(out.contains("schedule-agent-engineer"), "{out}");
 }
 
 #[test]
@@ -185,13 +191,15 @@ fn completion_flow() {
         &api,
         commands::completion::CompletionCmd::Create {
             learner_id: "learners-1".into(),
-            criterion_id: "cri-1".into(),
+            task_id: "task-data-second-brain".into(),
             status: Some("not_completed".into()),
         },
     )
     .unwrap();
     assert!(
-        out.contains("已创建完成记录 completions-1（learners-1 → cri-1，not_completed）"),
+        out.contains(
+            "已创建完成记录 completions-1（learners-1 → task-data-second-brain，not_completed）"
+        ),
         "{out}"
     );
 
@@ -204,7 +212,7 @@ fn completion_flow() {
     )
     .unwrap();
     assert!(
-        out.contains("已完成 completions-1（learners-1 → cri-1）"),
+        out.contains("已完成 completions-1（learners-1 → task-data-second-brain）"),
         "{out}"
     );
 
@@ -220,6 +228,31 @@ fn completion_flow() {
     )
     .unwrap();
     assert!(out.contains("状态: completed"), "{out}");
+}
+
+#[test]
+fn import_seed_upserts_tasks_and_schedules() {
+    let api = client();
+    let seed = std::env::current_dir()
+        .unwrap()
+        .join("../provider/seeds/learning.json");
+
+    let out = commands::import::run(&api, &seed).unwrap();
+    assert!(
+        out.contains("导入完成：tasks 10 个，schedules 2 个；新增 12，更新 0"),
+        "{out}"
+    );
+
+    let out = commands::import::run(&api, &seed).unwrap();
+    assert!(
+        out.contains("导入完成：tasks 10 个，schedules 2 个；新增 0，更新 12"),
+        "{out}"
+    );
+
+    let tasks = api.get("tasks").unwrap();
+    assert_eq!(tasks.as_array().unwrap().len(), 10);
+    let schedules = api.get("schedules").unwrap();
+    assert_eq!(schedules.as_array().unwrap().len(), 2);
 }
 
 #[test]

@@ -1,8 +1,10 @@
+use std::path::PathBuf;
+
 use clap::{Parser, Subcommand};
 
 use qtcloud_learn_cli::{api, commands};
 
-/// 量潮学习云 CLI（对齐《量潮学习管理标准》：Learner × Lesson → Completion）
+/// 量潮学习云 CLI（对齐《量潮学习管理标准》：Schedule + Task，Learner × Task → Completion）
 #[derive(Parser)]
 #[command(name = "qtcloud-learn", version, about)]
 struct Cli {
@@ -28,6 +30,11 @@ enum Commands {
         #[command(subcommand)]
         cmd: commands::completion::CompletionCmd,
     },
+    /// 导入学习管理种子数据
+    Import {
+        /// 种子 JSON 文件路径
+        path: PathBuf,
+    },
 }
 
 fn main() {
@@ -38,6 +45,7 @@ fn main() {
         Commands::Version => Ok(format!("qtcloud-learn {}", env!("CARGO_PKG_VERSION"))),
         Commands::Learner { cmd } => commands::learner::run(&api, cmd),
         Commands::Completion { cmd } => commands::completion::run(&api, cmd),
+        Commands::Import { path } => commands::import::run(&api, &path),
     };
 
     match output {

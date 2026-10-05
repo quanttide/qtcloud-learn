@@ -378,9 +378,17 @@ name = "qtcloud-learn-cli"
 version = "0.0.1"
 dependencies = [
  "clap",
+ "quanttide-learn",
  "serde",
  "serde_json",
  "ureq",
+]
+
+[[package]]
+name = "quanttide-learn"
+version = "0.1.0"
+dependencies = [
+ "serde",
 ]
 
 [[package]]

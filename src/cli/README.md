@@ -2,7 +2,7 @@
 
 量潮学习云的 CLI 工具。Rust 编写。
 
-领域模型对齐《量潮学习管理标准》（`docs/specification`）：核心模型 **Learner × Lesson → Completion**。
+领域模型对齐《量潮学习管理标准》（`docs/specification`）：核心模型 **Schedule + Task** 与标准实体 **Learner × Task → Completion**。
 
 ## 开发
 

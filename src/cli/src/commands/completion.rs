@@ -4,7 +4,7 @@ use serde_json::json;
 use crate::api::ApiClient;
 
 /// 完成记录子命令（对齐《量潮学习管理标准》Completion 实体：
-/// learner_id / criterion_id / status / created_at / updated_at）。
+/// learner_id / task_id / status / created_at / updated_at）。
 #[derive(Subcommand)]
 pub enum CompletionCmd {
     /// 创建完成记录
@@ -12,9 +12,9 @@ pub enum CompletionCmd {
         /// 学习者 ID
         #[arg(long)]
         learner_id: String,
-        /// 验收标准 ID（课程域 Criterion.id）
+        /// 任务 ID
         #[arg(long)]
-        criterion_id: String,
+        task_id: String,
         /// 通过状态：completed / not_completed（缺省 not_completed）
         #[arg(long)]
         status: Option<String>,
@@ -37,12 +37,12 @@ pub fn run(api: &ApiClient, cmd: CompletionCmd) -> Result<String, String> {
     match cmd {
         CompletionCmd::Create {
             learner_id,
-            criterion_id,
+            task_id,
             status,
         } => {
             let mut body = json!({
                 "learner_id": learner_id,
-                "criterion_id": criterion_id,
+                "task_id": task_id,
             });
             if let Some(s) = status {
                 body["status"] = json!(s);
@@ -52,7 +52,7 @@ pub fn run(api: &ApiClient, cmd: CompletionCmd) -> Result<String, String> {
                 "已创建完成记录 {}（{} → {}，{}）",
                 v["id"].as_str().unwrap_or(""),
                 v["learner_id"].as_str().unwrap_or(""),
-                v["criterion_id"].as_str().unwrap_or(""),
+                v["task_id"].as_str().unwrap_or(""),
                 v["status"].as_str().unwrap_or("")
             ))
         }
@@ -65,7 +65,7 @@ pub fn run(api: &ApiClient, cmd: CompletionCmd) -> Result<String, String> {
                 "已完成 {}（{} → {}）",
                 v["id"].as_str().unwrap_or(""),
                 v["learner_id"].as_str().unwrap_or(""),
-                v["criterion_id"].as_str().unwrap_or("")
+                v["task_id"].as_str().unwrap_or("")
             ))
         }
         CompletionCmd::List => {
@@ -74,13 +74,13 @@ pub fn run(api: &ApiClient, cmd: CompletionCmd) -> Result<String, String> {
             if arr.is_empty() {
                 return Ok("暂无完成记录".to_string());
             }
-            let mut out = String::from("ID\t学习者\t验收标准\t状态\t创建时间\n");
+            let mut out = String::from("ID\t学习者\t任务\t状态\t创建时间\n");
             for v in arr {
                 out.push_str(&format!(
                     "{}\t{}\t{}\t{}\t{}\n",
                     v["id"].as_str().unwrap_or(""),
                     v["learner_id"].as_str().unwrap_or(""),
-                    v["criterion_id"].as_str().unwrap_or(""),
+                    v["task_id"].as_str().unwrap_or(""),
                     v["status"].as_str().unwrap_or(""),
                     v["created_at"].as_str().unwrap_or("")
                 ));
@@ -93,7 +93,7 @@ pub fn run(api: &ApiClient, cmd: CompletionCmd) -> Result<String, String> {
                 "完成记录 {}：{} → {}\n状态: {}\n创建: {}\n更新: {}",
                 v["id"].as_str().unwrap_or(""),
                 v["learner_id"].as_str().unwrap_or(""),
-                v["criterion_id"].as_str().unwrap_or(""),
+                v["task_id"].as_str().unwrap_or(""),
                 v["status"].as_str().unwrap_or(""),
                 v["created_at"].as_str().unwrap_or(""),
                 v["updated_at"].as_str().unwrap_or("")
