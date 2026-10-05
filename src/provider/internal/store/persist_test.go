@@ -15,7 +15,7 @@ func TestCompletionPersistence(t *testing.T) {
 
 	s1 := NewCompletionStore()
 	s1.BaseStore.SetPersister(NewFilePersister(dir))
-	created := s1.Create(&domain.Completion{LearnerID: "lea-1", CriterionID: "cri-1", Status: "completed"})
+	created := s1.Create(&domain.Completion{LearnerID: "lea-1", TaskID: "task-data-second-brain", Status: domain.CompletionStatusCompleted})
 	if created.ID == "" {
 		t.Fatal("create failed")
 	}
@@ -30,12 +30,12 @@ func TestCompletionPersistence(t *testing.T) {
 	if !ok {
 		t.Fatalf("restored completion %s not found", created.ID)
 	}
-	if got.LearnerID != "lea-1" || got.CriterionID != "cri-1" || got.Status != "completed" {
+	if got.LearnerID != "lea-1" || got.TaskID != "task-data-second-brain" || got.Status != domain.CompletionStatusCompleted {
 		t.Errorf("restored = %+v", got)
 	}
 
 	// 序号恢复：新创建的 ID 不与旧记录冲突
-	next := s2.Create(&domain.Completion{LearnerID: "lea-1", CriterionID: "cri-2"})
+	next := s2.Create(&domain.Completion{LearnerID: "lea-1", TaskID: "task-data-intention"})
 	if next.ID == created.ID {
 		t.Errorf("seq not restored: %s == %s", next.ID, created.ID)
 	}

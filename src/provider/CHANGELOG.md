@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## [Unreleased]
+
+### Added
+
+- 新增 Schedule / Task 领域模型与 CRUD API：`/schedules`、`/tasks`
+- 领域模型改为引用 `quanttide-learn-toolkit/packages/go` type alias，避免跨仓复制模型
+
+### Changed
+
+- Completion 从旧课程域 `criterion_id` 对齐为学习管理标准 `task_id`
+- Learner 支持 `schedule_id` 字段，关联学习路径/训练营
+
 ## [0.1.0-alpha.5] - 2026-08-28
 
 ### Removed / Changed

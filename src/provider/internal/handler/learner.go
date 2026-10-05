@@ -12,7 +12,7 @@ type LearnerHandler = CRUDHandler[domain.Learner]
 func NewLearnerHandler(s *store.LearnerStore) *LearnerHandler {
 	return NewCRUDHandler(
 		s,
-		func(l *domain.Learner) string { return "" }, // 无必填字段（id 自动生成，user_id 预留）
+		func(l *domain.Learner) string { return "" }, // id 自动生成；user_id / schedule_id 均可选
 		func(l *domain.Learner, id string) { l.ID = id },
 	)
 }

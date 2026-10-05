@@ -31,6 +31,7 @@ func (s *LearnerStore) Update(l *domain.Learner) (*domain.Learner, bool) {
 		return nil, false
 	}
 	existing.UserID = l.UserID
+	existing.ScheduleID = l.ScheduleID
 	s.persist()
 	return existing, true
 }

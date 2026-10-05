@@ -17,10 +17,10 @@ func NewCompletionHandler(s *store.CompletionStore) *CompletionHandler {
 			if c.LearnerID == "" {
 				return "learner_id is required"
 			}
-			if c.CriterionID == "" {
-				return "criterion_id is required"
+			if c.TaskID == "" {
+				return "task_id is required"
 			}
-			if c.Status != "" && c.Status != "completed" && c.Status != "not_completed" {
+			if c.Status != "" && c.Status != domain.CompletionStatusCompleted && c.Status != domain.CompletionStatusNotCompleted {
 				return "status must be completed or not_completed"
 			}
 			return ""

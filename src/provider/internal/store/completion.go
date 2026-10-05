@@ -21,7 +21,7 @@ func (s *CompletionStore) Create(c *domain.Completion) *domain.Completion {
 	clone := *c
 	clone.ID = s.nextID()
 	if clone.Status == "" {
-		clone.Status = "not_completed"
+		clone.Status = domain.CompletionStatusNotCompleted
 	}
 	now := time.Now().Format(time.RFC3339)
 	if clone.CreatedAt == "" {
@@ -41,7 +41,7 @@ func (s *CompletionStore) Update(c *domain.Completion) (*domain.Completion, bool
 		return nil, false
 	}
 	existing.LearnerID = c.LearnerID
-	existing.CriterionID = c.CriterionID
+	existing.TaskID = c.TaskID
 	existing.Status = c.Status
 	existing.UpdatedAt = time.Now().Format(time.RFC3339)
 	s.persist()

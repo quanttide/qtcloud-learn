@@ -21,7 +21,7 @@ func TestHealthz(t *testing.T) {
 	}
 }
 
-// TestRouter_SpecRoutes 冒烟测试：对齐 spec 的三个资源路由已注册并可创建/读取。
+// TestRouter_SpecRoutes 冒烟测试：对齐 spec 的资源路由已注册并可创建/读取。
 func TestRouter_SpecRoutes(t *testing.T) {
 	mux := newRouter()
 
@@ -30,8 +30,10 @@ func TestRouter_SpecRoutes(t *testing.T) {
 		path string
 		body string
 	}{
-		{"learners", "/learners", `{"user_id":"user-123"}`},
-		{"completions", "/completions", `{"learner_id":"lea-1","criterion_id":"cri-1"}`},
+		{"learners", "/learners", `{"user_id":"user-123","schedule_id":"schedule-agent-engineer"}`},
+		{"tasks", "/tasks", `{"id":"task-data-second-brain","title":"熟悉数据工程第二大脑","description":"完成一条改进建议。"}`},
+		{"schedules", "/schedules", `{"id":"schedule-agent-engineer","title":"智能体工程师训练营","tasks":[{"id":"task-data-second-brain","title":"熟悉数据工程第二大脑","description":"完成一条改进建议。"}]}`},
+		{"completions", "/completions", `{"learner_id":"lea-1","task_id":"task-data-second-brain"}`},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

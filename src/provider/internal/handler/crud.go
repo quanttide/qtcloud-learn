@@ -90,6 +90,10 @@ func (h *CRUDHandler[T]) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.setIDFn(&entity, id)
+	if msg := h.validateFn(&entity); msg != "" {
+		http.Error(w, `{"error":"`+msg+`"}`, http.StatusBadRequest)
+		return
+	}
 	updated, ok := h.store.Update(&entity)
 	if !ok {
 		http.Error(w, `{"error":"not found"}`, http.StatusNotFound)
