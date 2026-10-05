@@ -6,6 +6,7 @@
 
 - 新增 Schedule / Task 领域模型与 CRUD API：`/schedules`、`/tasks`
 - 领域模型改为引用 `quanttide-learn-toolkit/packages/go` type alias，避免跨仓复制模型
+- 新增 `seeds/learning.json`，承载从学习档案/qtclass 学习中心清洗出的训练营与任务种子数据
 
 ### Changed
 

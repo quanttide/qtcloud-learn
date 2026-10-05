@@ -22,6 +22,7 @@ internal/domain/     # 领域模型 type alias（Learner / Completion / Schedule
 internal/store/      # 内存存储（BaseStore + 各实体 Store）
 internal/handler/    # CRUD handler（泛型 CRUDHandler + 各实体 Handler）
 internal/version/    # 版本信息
+seeds/               # 学习档案清洗后的 Schedule / Task 种子数据
 ```
 
 ## API
