@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [Unreleased]
+
+### Added
+
+- LMS 后台新增训练营/任务管理页，支持 Schedule / Task 列表、保存、删除与训练营任务勾选
+
 ## [0.1.1] - 2026-08-17
 
 ### Changed

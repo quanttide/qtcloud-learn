@@ -35,13 +35,81 @@ MockClient _mockClient() {
         headers: {'content-type': 'application/json'},
       );
     }
+    if (path.endsWith('/tasks/task-data-second-brain')) {
+      return http.Response(
+        jsonEncode({
+          'id': 'task-data-second-brain',
+          'title': '熟悉数据工程第二大脑',
+          'description': '提交一条改进建议',
+        }),
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+    }
+    if (path.endsWith('/tasks')) {
+      return http.Response(
+        jsonEncode([
+          {
+            'id': 'task-data-second-brain',
+            'title': '熟悉数据工程第二大脑',
+            'description': '提交一条改进建议',
+          },
+        ]),
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+    }
+    if (path.endsWith('/schedules/schedule-agent-engineer')) {
+      return http.Response(
+        jsonEncode({
+          'id': 'schedule-agent-engineer',
+          'title': '智能体工程师训练营',
+          'description': '按学习路径推进的训练计划',
+          'tasks': [
+            {
+              'id': 'task-data-second-brain',
+              'title': '熟悉数据工程第二大脑',
+              'description': '提交一条改进建议',
+            },
+          ],
+        }),
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+    }
+    if (path.endsWith('/schedules')) {
+      return http.Response(
+        jsonEncode([
+          {
+            'id': 'schedule-agent-engineer',
+            'title': '智能体工程师训练营',
+            'description': '按学习路径推进的训练计划',
+            'tasks': [
+              {
+                'id': 'task-data-second-brain',
+                'title': '熟悉数据工程第二大脑',
+                'description': '提交一条改进建议',
+              },
+            ],
+          },
+        ]),
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+    }
     if (path.endsWith('/api/proposals/history')) {
-      return http.Response(jsonEncode({'history': []}), 200,
-          headers: {'content-type': 'application/json'});
+      return http.Response(
+        jsonEncode({'history': []}),
+        200,
+        headers: {'content-type': 'application/json'},
+      );
     }
     if (path.contains('/api/proposals/')) {
-      return http.Response('{"success":true}', 200,
-          headers: {'content-type': 'application/json'});
+      return http.Response(
+        '{"success":true}',
+        200,
+        headers: {'content-type': 'application/json'},
+      );
     }
     if (path.endsWith('/api/proposals')) {
       return http.Response(
@@ -90,6 +158,14 @@ void main() {
     final history = await api.fetchHistory();
     expect(history, isEmpty);
 
+    final tasks = await api.fetchTasks();
+    expect(tasks.length, 1);
+    expect(tasks.first.id, 'task-data-second-brain');
+
+    final schedules = await api.fetchSchedules();
+    expect(schedules.length, 1);
+    expect(schedules.first.tasks.single.title, '熟悉数据工程第二大脑');
+
     await api.deleteProposal('appl-1'); // 不抛异常即通过
   });
 
@@ -127,7 +203,9 @@ void main() {
     expect(partner.teamLabel, '队长：李四 / 队员：王五、赵六');
   });
 
-  testWidgets('AdminShell 侧边栏三板块 + 学员表进度/立项 + 立项表组队', (WidgetTester tester) async {
+  testWidgets('AdminShell 侧边栏四板块 + 学习管理 + 学员表/立项表', (
+    WidgetTester tester,
+  ) async {
     final api = AdminApi(client: _mockClient(), baseUrl: 'http://fake');
     await tester.pumpWidget(AdminApp(api: api));
     await tester.pumpAndSettle();
@@ -135,23 +213,39 @@ void main() {
     // 侧边栏
     expect(find.text('概览'), findsWidgets);
     expect(find.text('学员'), findsWidgets);
+    expect(find.text('训练营'), findsWidgets);
     expect(find.text('立项'), findsWidgets);
 
     // 切到学员 tab：姓名/进度/立项✓
-    await tester.tap(find.descendant(
-      of: find.byType(NavigationRail),
-      matching: find.text('学员'),
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationRail),
+        matching: find.text('学员'),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('张三'), findsOneWidget);
     expect(find.text('3/5 模块'), findsOneWidget);
     expect(find.text('✓ 选课助手'), findsOneWidget);
 
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationRail),
+        matching: find.text('训练营'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('训练营与任务'), findsOneWidget);
+    expect(find.text('智能体工程师训练营'), findsOneWidget);
+    expect(find.text('熟悉数据工程第二大脑'), findsWidgets);
+
     // 立项表：组队姓名栏 + 历史开关
-    await tester.tap(find.descendant(
-      of: find.byType(NavigationRail),
-      matching: find.text('立项'),
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationRail),
+        matching: find.text('立项'),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('选课助手'), findsOneWidget);
     expect(find.text('队长：张三 / 队员：李四、王五'), findsOneWidget);

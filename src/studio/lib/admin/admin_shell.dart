@@ -1,10 +1,11 @@
 // LMS 管理后台框架页（对齐规格 admin.md）：AppBar + 侧边栏 + 内容区。
-// v0.1 菜单收窄为后台核心三块：概览 / 学员 / 立项。
+// v0.1 菜单收窄为后台核心四块：概览 / 学员 / 训练营任务 / 立项。
 
 import 'package:flutter/material.dart';
 
 import 'admin_api.dart';
 import 'pages/dashboard_page.dart';
+import 'pages/learning_management_page.dart';
 import 'pages/learners_page.dart';
 import 'pages/proposals_page.dart';
 
@@ -25,6 +26,7 @@ class _AdminShellState extends State<AdminShell> {
     final pages = [
       DashboardPage(api: widget.api),
       LearnersPage(api: widget.api),
+      LearningManagementPage(api: widget.api),
       ProposalsPage(api: widget.api),
     ];
     return Scaffold(
@@ -33,7 +35,9 @@ class _AdminShellState extends State<AdminShell> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: Center(child: Text('v0.1', style: Theme.of(context).textTheme.bodySmall)),
+            child: Center(
+              child: Text('v0.1', style: Theme.of(context).textTheme.bodySmall),
+            ),
           ),
         ],
       ),
@@ -56,6 +60,11 @@ class _AdminShellState extends State<AdminShell> {
                   icon: Icon(Icons.person_outline),
                   selectedIcon: Icon(Icons.person),
                   label: Text('学员'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.route_outlined),
+                  selectedIcon: Icon(Icons.route),
+                  label: Text('训练营'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.rocket_launch_outlined),
