@@ -28,5 +28,5 @@ cargo test
 
 ## 相关文档
 
-- [ROADMAP.md](ROADMAP.md) — 路线图
+- [ROADMAP.md](docs/dev-guide/roadmap.md) — 路线图
 - [CHANGELOG.md](CHANGELOG.md) — 变更记录

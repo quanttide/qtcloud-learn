@@ -1,6 +1,6 @@
 # ROADMAP
 
-> 本 scope 规划对齐根 [ROADMAP.md](../../ROADMAP.md) 的能力演进阶段。
+> 本 scope 规划对齐根 [ROADMAP.md](../../../../ROADMAP.md) 的能力演进阶段。
 
 ## [v1.0] — 直连 provider（对齐根 v1.0）
 
